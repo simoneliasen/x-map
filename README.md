@@ -1,7 +1,9 @@
-# x-map
-Medical Diagnostics Using Deep Learning
+# x-map 
+![alt text](https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/google/313/x-ray_1fa7b.png)
 
-For now, simple CNN integrated with Docker.
+**Medical Diagnostics Using Deep Learning**
+- For now, simple CNN integrated with Docker.
+
 
 
 ## How to run:
