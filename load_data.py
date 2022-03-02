@@ -16,5 +16,5 @@ def load_data():
 
     classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
-    print('Loaded data succesfully')
+    print('Loaded data succesfully\n')
     return transform, batch_size, trainset, trainloader, testset, testloader, classes
