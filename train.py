@@ -26,18 +26,11 @@ def training(trainloader, optimizer, net, criterion, PATH):
             if i % 2000 == 1999:    # print every 2000 mini-batches
                 print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
                 running_loss = 0.0
+        print("\n")
 
-    print('Finished Training')
+    print('Finished Training\n')
 
     #Save the trained model
     torch.save(net.state_dict(), PATH)
 
-    print('Saved The Trained Model')
-
-
-
-
-
-
-
-
+    print('Saved The Trained Model\n')
