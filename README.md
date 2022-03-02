@@ -28,3 +28,7 @@ For now, simple CNN integrated with Docker.
 ## Debugging
 - Run Container interactively: ```docker run -it image-name-here /bin/bash```
 - Export files from container to local system: ```docker export container-name-here > imgtest.tar```
+- Copy singular file from Docker to Localhost:
+  1. type out ```docker ps``` to get the Contained ID
+  2. ```docker cp container-id-here:/opt/app/app.log .``` copy the specified file, to the local working directory
+- Copy from Local host to Docker (easier way would be to just build again) ```docker cp /host/local/path/file container-id-here:/file/path/in/container/file```  
