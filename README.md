@@ -20,7 +20,6 @@
 - [ ] Use correct training + test data
 - [ ] Setup GPU avalability in container (also needs to be configured with model)
 - [ ] Higher ease of use with continious development
-- [ ] How to export singular files from docker container (e.g. images)
 - [ ] Should/can Wandb be used as the only data visualization tool?
 - [ ] What CNN to use?
 - [ ] Data-augmentation to get more data
