@@ -8,8 +8,9 @@ For now, simple CNN integrated with Docker.
 1. [Install Docker Desktop-client](https://www.docker.com/get-started)
 3. Open docker desktop
 4. Navigate to project-location
-5. run ```docker build -t image-name-here .``` in cmd to build the docker environment for the application and,
-6. ```docker run image-name-here``` to run the application
+5. Run ```docker build -t image-name-here .``` in cmd to build the docker environment for the application
+  - Do this each time you want to update the contents of your docker container.
+7. ```docker run image-name-here``` to run the application
 
 
 ## To do:
