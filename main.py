@@ -27,7 +27,6 @@ from load_data import load_data
 #config = wandb.config
 # Pass config.epochs to training, also wandb.log(loss)
 
-
 #load data
 transform, batch_size, trainset, trainloader, testset, testloader, classes = load_data()
 
@@ -46,5 +45,3 @@ training(trainloader, optimizer, net, criterion, PATH)
 testing(testloader, classes, PATH)
 
 #wandb.finish()
-
-
