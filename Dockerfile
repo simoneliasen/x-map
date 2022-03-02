@@ -19,7 +19,5 @@ RUN pip3 install -r requirements.txt
 #COPY everything from local directory to docker image 
 COPY . .
 
-#Singular copies also possible
-#COPY CNN.py ./
-
+#Command to run after image has been created
 CMD ["python3", "main.py"]
