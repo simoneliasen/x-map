@@ -23,3 +23,8 @@ For now, simple CNN integrated with Docker.
 - [ ] Data-augmentation to get more data
 - [ ] Attention-mechanism to get heatmaps of diagnostics on image
 - [ ] Hyperparameter tuning (probably with bayesian search)
+
+
+## Debugging
+- Run Container interactively: ```docker run -it image-name-here /bin/bash```
+- Export files from container to local system: ```docker export container-name-here > imgtest.tar```
