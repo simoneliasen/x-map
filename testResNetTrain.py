@@ -16,8 +16,8 @@ if __name__ == '__main__':
 
     transform = transforms.Compose(
         [transforms.ToTensor(),
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize(36),
+        transforms.CenterCrop(32),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     batch_size = 4
