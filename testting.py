@@ -3,6 +3,8 @@ import urllib
 from PIL import Image
 from torchvision import transforms
 from pathlib import Path
+from os import listdir
+from os.path import isfile, join
 model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
 # or any of these variants
 # model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet34', pretrained=True)
@@ -11,6 +13,10 @@ model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
 # model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet152', pretrained=True)
 model.eval()
 
+mypath = Path("../ChinaSet_AllFiles/CXR_png/")
+onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+index = 360
+has_tubercolosis = False if ((onlyfiles[index].split('.')[0].split('_')[-1]) == '0') else True
 url, filename = ("../ChinaSet_AllFiles/CXR_png/CHNCXR_0001_0.png", "CHNCXR_0001_0.png")
 path = Path("../ChinaSet_AllFiles/CXR_png/CHNCXR_0001_0.png")
 filename = path
