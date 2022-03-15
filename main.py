@@ -1,102 +1,98 @@
+import warnings
+warnings.filterwarnings('ignore')
+warnings.simplefilter('ignore')
+from torchvision.models.segmentation import deeplabv3_resnet50
 import torch
-import torchvision
-import torchvision.transforms as transforms
-# Display images
-from PIL import Image
-#For saliency
+import torch.functional as F
 import numpy as np
+import requests
+import torchvision
+from PIL import Image
+from pytorch_grad_cam.utils.image import show_cam_on_image, preprocess_image
 import matplotlib.pyplot as plt
-
-#load pretrained resnet model
-model = torchvision.models.alexnet(pretrained=True)
-print(model)
-
-#define transforms to preprocess input image into format expected by model
-normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-#inverse transform to get normalize image back to original form for visualization
-inv_normalize = transforms.Normalize(
-    mean=[-0.485/0.229, -0.456/0.224, -0.406/0.255],
-    std=[1/0.229, 1/0.224, 1/0.255]
-)
-
-#transforms to resize image to the size expected by pretrained model,
-#convert PIL image to tensor, and
-#normalize the image
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    normalize,          
-])
+from pytorch_grad_cam import GradCAM
 
 
+# Get data
+image_url = "https://www.carscoops.com/wp-content/uploads/2012/05/Hyundai-i30-Monkeys-3.jpg"
+image = np.array(Image.open(requests.get(image_url, stream=True).raw))
+rgb_img = np.float32(image) / 255
+input_tensor = preprocess_image(rgb_img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+# Taken from the torchvision tutorial
+# https://pytorch.org/vision/stable/auto_examples/plot_visualization_utils.html
 
-############ SALIENCY MAPPING #################
 
-def saliency(img, model):
-    #we don't need gradients w.r.t. weights for a trained model
-    for param in model.parameters():
-        param.requires_grad = False
+# Define model
+model = deeplabv3_resnet50(pretrained=True, progress=False)
+model = model.eval()
+
+if torch.cuda.is_available():
+    model = model.cuda()
+    input_tensor = input_tensor.cuda()
+
+output = model(input_tensor)
+print(type(output), output.keys())
+
+
+
+# Convert dictionary output to tensor
+class SegmentationModelOutputWrapper(torch.nn.Module):
+    def __init__(self, model): 
+        super(SegmentationModelOutputWrapper, self).__init__()
+        self.model = model
+        
+    def forward(self, x):
+        return self.model(x)["out"]
     
-    #set model in eval mode
-    model.eval()
-    #transoform input PIL image to torch.Tensor and normalize
-    input = transform(img)
-    input.unsqueeze_(0)
-
-    #we want to calculate gradient of higest score w.r.t. input
-    #so set requires_grad to True for input 
-    input.requires_grad = True
-    #forward pass to calculate predictions
-    preds = model(input)
-    score, indices = torch.max(preds, 1)
-    #backward pass to get gradients of score predicted class w.r.t. input image
-    score.backward()
-    #get max along channel axis
-    slc, _ = torch.max(torch.abs(input.grad[0]), dim=0)
-    #normalize to [0..1]
-    slc = (slc - slc.min())/(slc.max()-slc.min())
-
-    #apply inverse transform on image
-    with torch.no_grad():
-        input_img = inv_normalize(input[0])
-    #plot image and its saleincy map
-    plt.figure(figsize=(10, 10))
-    plt.subplot(1, 2, 1)
-    plt.imshow(np.transpose(input_img.detach().numpy(), (1, 2, 0)))
-    plt.xticks([])
-    plt.yticks([])
-    plt.subplot(1, 2, 2)
-    plt.imshow(slc.numpy(), cmap=plt.cm.hot)
-    plt.xticks([])
-    plt.yticks([])
-    plt.show()
-
-
-
-img = Image.open('images/monkey.jpg').convert('RGB')
-saliency(img, model)
-
-img = Image.open('images/puppy.jpg').convert('RGB')
-saliency(img, model)
-
-img = Image.open('images/space.jpg').convert('RGB')
-saliency(img, model)
-
-img = Image.open('images/aircraft.jpg').convert('RGB')
-saliency(img, model)
-
-
-
-img = Image.open('images/gorilla.jpg').convert('RGB')
-saliency(img, model)
+model = SegmentationModelOutputWrapper(model)
+output = model(input_tensor)
+print(type(output))
 
 
 
 
 
+normalized_masks = torch.nn.functional.softmax(output, dim=1).cpu()
+sem_classes = ['__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+sem_class_to_idx = {cls: idx for (idx, cls) in enumerate(sem_classes)}
+
+car_category = sem_class_to_idx["car"]
+car_mask = normalized_masks[0, :, :, :].argmax(axis=0).detach().cpu().numpy()
+car_mask_uint8 = 255 * np.uint8(car_mask == car_category)
+car_mask_float = np.float32(car_mask == car_category)
+
+both_images = np.hstack((image, np.repeat(car_mask_uint8[:, :, None], 3, axis=-1)))
+Image.fromarray(both_images)
+#print(type(both_images))
+
+plt.imshow(both_images, interpolation='nearest')
+plt.show()
 
 
 
-# Cam library something
-#https://github.com/zhoubolei/CAM
+
+# Classs activation method, sum all car category and sum their predictions
+class SemanticSegmentationTarget:
+    def __init__(self, category, mask):
+        self.category = category
+        self.mask = torch.from_numpy(mask)
+        if torch.cuda.is_available():
+            self.mask = self.mask.cuda()
+        
+    def __call__(self, model_output):
+        return (model_output[self.category, :, : ] * self.mask).sum()
+
+    
+target_layers = [model.model.backbone.layer4]
+targets = [SemanticSegmentationTarget(car_category, car_mask_float)]
+
+with GradCAM(model=model,
+             target_layers=target_layers,
+             use_cuda=torch.cuda.is_available()) as cam:
+    grayscale_cam = cam(input_tensor=input_tensor,
+                        targets=targets)[0, :]
+    cam_image = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
+
+Image.fromarray(cam_image)
+plt.imshow(cam_image, interpolation='nearest')
+plt.show()
