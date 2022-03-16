@@ -14,11 +14,18 @@ from torch.utils.data import DataLoader
 
 if __name__ == '__main__':
 
-    transform = transforms.Compose(
+    transform2 = transforms.Compose(
         [transforms.ToTensor(),
         transforms.Resize(36),
         transforms.CenterCrop(32),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+    transform = transforms.Compose([ #fra resnet.
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
 
     batch_size = 4
 
@@ -55,26 +62,28 @@ if __name__ == '__main__':
 
     class Net(nn.Module):
         def __init__(self):
-            self.PATH = './cifar_net.pth'
+            self.PATH = './resting2.pth'
             super().__init__()
             self.conv1 = nn.Conv2d(3, 6, 5)
             self.pool = nn.MaxPool2d(2, 2)
             self.conv2 = nn.Conv2d(6, 16, 5)
-            self.fc1 = nn.Linear(16 * 5 * 5, 120)
+            self.fc1 = nn.Linear(16 * 53 * 53, 120) #5 rettet til 53, pga. 224 - 4 (kernel size) = 220. / 2 (pool) = 110 - 4 (kernel) = 106 / 2 = 53
             self.fc2 = nn.Linear(120, 84)
-            self.fc3 = nn.Linear(84, 10)
+            self.fc3 = nn.Linear(84, 2) #fra 84, 2 (fordi vi kun har 2 labels.)
             #self.fc1 = nn.Linear(16 * 5 * 5, 120)
             #self.fc2 = nn.Linear(120, 84)
             #self.fc3 = nn.Linear(84, 10)
 
         def forward(self, x):
-            x = self.pool(F.relu(self.conv1(x)))
-            x = self.pool(F.relu(self.conv2(x)))
-            x = torch.flatten(x, 1) # flatten all dimensions except batch
-            x = F.relu(self.fc1(x))
-            x = F.relu(self.fc2(x))
-            x = self.fc3(x)
-            return x
+            x2 = self.conv1(x)
+            x22 = self.pool(F.relu(x2))
+            x3 = self.conv2(x22)
+            x33 = self.pool(F.relu(x3))
+            x4 = torch.flatten(x33, 1) # flatten all dimensions except batch
+            x5 = F.relu(self.fc1(x4))
+            x6 = F.relu(self.fc2(x5))
+            x7 = self.fc3(x6)
+            return x7
 
         def train(self):
             criterion = nn.CrossEntropyLoss()
@@ -163,7 +172,7 @@ if __name__ == '__main__':
 
 
     net = Net()
-    net.load_state_dict(torch.load(net.PATH))
+    #net.load_state_dict(torch.load(net.PATH))
     net.train()
     net.test()
     net.evaluatePerformance()
