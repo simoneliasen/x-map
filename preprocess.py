@@ -2,8 +2,26 @@ import numpy as np
 from numpy import asarray
 #from skimage.io import imread
 import os
+from pathlib import Path
+from os import listdir
+from os.path import isfile, join
 from PIL import Image, ImageOps
 import time
+import shutil
+
+def label_files():
+    mypath = 'PP_data'
+    for f in os.listdir(mypath):
+        # move if TB positive
+        if f.endswith('1.png'):
+            shutil.move(os.path.join(mypath, f), os.path.join(mypath,"TB_Positive"))
+        # move if TB negative
+        elif f.endswith('0.png'):
+            shutil.move(os.path.join(mypath, f), os.path.join(mypath, "TB_Negative"))
+        # notify if something else
+        else:
+            print('Could not categorize file with name %s' % f)
+    
 
 
 def preprocess(img_dir):
@@ -14,6 +32,7 @@ def preprocess(img_dir):
         #Resize image
         img = Image.open(os.path.join(img_dir, img_name))
         img = img.resize((256,256), Image.ANTIALIAS)
+
         #Greyscale image
         img = ImageOps.grayscale(img)
        
@@ -38,9 +57,10 @@ def preprocess(img_dir):
 
 start_time = time.time()
 #Kims Path: 'C:/Users/Monkk/OneDrive/Dokumenter/AAU/CS/CS2/01.P8/Data/ChinaSet_AllFiles/CXR_png'
-image_directory = 'C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
+image_directory ='D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 
 preprocess(image_directory)
+label_files()
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
