@@ -1,20 +1,18 @@
 import torch
-import torchvision
-import torchvision.transforms as transforms
+from torchvision import transforms, datasets
+import pandas as pd
 
+batch_size=5
+dataset = datasets.ImageFolder(root = "PP_data")
 
-def load_data():
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+transform = { 'train': transforms.Compose([
+                    transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+                    transforms.RandomHorizontalFlip(p=0.3),
+                    transforms.RandomAutocontrast(p=0.3),
+                    transforms.RandomAffine(degrees = (0,30), translate = (0.3,0.1)),
+                    transforms.ToTensor()]),
+                'test': transforms.Compose([
+                    ##
+                ])
+}
 
-    batch_size = 4
-
-    trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-
-    testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
-
-    classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-    
-    print('Loaded data succesfully\n')
-    return transform, batch_size, trainset, trainloader, testset, testloader, classes
