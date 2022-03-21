@@ -73,8 +73,11 @@ class ResNet():
             losses = []
             running_loss = 0
             for i, inp in enumerate(self.trainloader):
-                inputs, labels = inp
-                #inputs, labels = inputs.to('cuda'), labels.to('cuda')
+                
+                if torch.cuda.is_available():
+                    inputs, labels = inputs.to('cuda'), labels.to('cuda')
+                else:
+                    inputs, labels = inp
                 self.optimizer.zero_grad()
             
                 outputs = self.model(inputs)
@@ -103,8 +106,11 @@ class ResNet():
 
         with torch.no_grad():
             for data in self.testloader:
-                images, labels = data
-                #images, labels = images.to('cuda'), labels.to('cuda')
+                
+                if torch.cuda.is_available():
+                    images, labels = images.to('cuda'), labels.to('cuda')
+                else:
+                    images, labels = data
                 outputs = self.model(images)
                 
                 _, predicted = torch.max(outputs.data, 1)
