@@ -64,7 +64,7 @@ if __name__ == '__main__':
         def __init__(self):
             self.PATH = './resting2.pth'
             super().__init__()
-            self.conv1 = nn.Conv2d(3, 6, 5)
+            self.conv1 = nn.Conv2d(1, 6, 5)
             self.pool = nn.MaxPool2d(2, 2)
             self.conv2 = nn.Conv2d(6, 16, 5)
             self.fc1 = nn.Linear(16 * 53 * 53, 120) #5 rettet til 53, pga. 224 - 4 (kernel size) = 220. / 2 (pool) = 110 - 4 (kernel) = 106 / 2 = 53
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 
 
     net = Net()
-    #net.load_state_dict(torch.load(net.PATH))
+    net.load_state_dict(torch.load(net.PATH))
     net.train()
     net.test()
     net.evaluatePerformance()
