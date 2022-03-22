@@ -18,6 +18,7 @@ class ResNet():
         #self.model = torch.load(self.model_path)
         self.model.eval() #?
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(self.device)
         self.loadModelSettings()
 
     def load_split_train_test(self, datadir, valid_size = .2):
@@ -74,10 +75,10 @@ class ResNet():
             running_loss = 0
             for i, inp in enumerate(self.trainloader):
                 
+                inputs, labels = inp
                 if torch.cuda.is_available():
                     inputs, labels = inputs.to('cuda'), labels.to('cuda')
-                else:
-                    inputs, labels = inp
+                    
                 self.optimizer.zero_grad()
             
                 outputs = self.model(inputs)
@@ -107,10 +108,10 @@ class ResNet():
         with torch.no_grad():
             for data in self.testloader:
                 
+                images, labels = data
                 if torch.cuda.is_available():
                     images, labels = images.to('cuda'), labels.to('cuda')
-                else:
-                    images, labels = data
+                    
                 outputs = self.model(images)
                 
                 _, predicted = torch.max(outputs.data, 1)
