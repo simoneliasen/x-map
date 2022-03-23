@@ -47,14 +47,18 @@ def preprocess(img_dir):
 
         # normalize to the range 0-1
         pixels = (pixels - pixels.min())/(pixels.max() - pixels.min())
-
+        print('after normalizing' + pixels)
         # Save Image
         PIL_img = Image.fromarray(np.uint8(pixels))
         PIL_img.save('PP_Data/' + img_name)
+        newimg = asarray(PIL_img)
+        print('after conversion ' + newimg)
 
 start_time = time.time()
 #Kims Path: 'C:/Users/Monkk/OneDrive/Dokumenter/AAU/CS/CS2/01.P8/Data/ChinaSet_AllFiles/CXR_png'
-image_directory ='D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
+#Dennis Stationær: D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png
+
+image_directory ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 
 preprocess(image_directory)
 label_files()
