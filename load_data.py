@@ -49,23 +49,25 @@ def get_dataloader(img_dir, batch_size):
 
     concat_dataset = ConcatDataset([normalized_dataset, transformed_dataset])
   
-    list_of_classes=list(map(str, list(transformed_dataset.classes)) )
+    # list_of_classes=list(map(str, list(transformed_dataset.classes)) )
 
-    print(list_of_classes)
-    for idx, (sample, target) in enumerate(concat_dataset):
-        print(sample, list_of_classes[target] )
+    # print(list_of_classes)
+    # for idx, (sample, target) in enumerate(concat_dataset):
+    #     print(sample, list_of_classes[target] )
 
     dl_cds = DataLoader(concat_dataset, batch_size = batch_size, shuffle=True)
+    return dl_cds
 
 
 #Kims Path: 'C:/Users/Monkk/OneDrive/Dokumenter/AAU/CS/CS2/01.P8/Data/ChinaSet_AllFiles/CXR_png'
 #Dennis Stationær: D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png
 #Dennis laptop: C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 
-img_dir ='D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
-get_dataloader(img_dir, batch_size = 5)
+img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
+batchsize = 5
+get_dataloader(img_dir)
 
-# iterate through entire dataset and count how many elements there are
+# #iterate through entire dataset and count how many elements there are
 # count = 0
 # for x in normalized_dataset:
 #      print(x)
@@ -77,8 +79,8 @@ get_dataloader(img_dir, batch_size = 5)
 # # enumerate splits
 # for train, test in kfold.split(dataset):
 # 	print('train: %s, test: %s' % (train, test))
-#classes with corresponding id. (tb_negative 0, tb_positive 1)
-#print(transformed_dataset.class_to_idx)
+# classes with corresponding id. (tb_negative 0, tb_positive 1)
+# print(transformed_dataset.class_to_idx)
 
-#Paths of all pictures and corresponding labels
-#print(transformed_dataset.imgs)
+# Paths of all pictures and corresponding labels
+# print(transformed_dataset.imgs)
