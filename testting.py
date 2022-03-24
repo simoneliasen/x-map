@@ -12,7 +12,7 @@ from torchvision import datasets, transforms, models
 class ResNet():
     def __init__(self):
         self.model_path = './resnet.pth'
-        self.data_dir = "./PP_data/" # "../ChinaSet_AllFiles/CXR_png/"
+        self.data_dir = "../PP_data/" # "../ChinaSet_AllFiles/CXR_png/"
         #self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
         self.model = models.resnet50(pretrained=True) #altså den rigtige
         #self.model = torch.load(self.model_path)
@@ -22,11 +22,13 @@ class ResNet():
         self.loadModelSettings()
 
     def load_split_train_test(self, datadir, valid_size = .2):
-        train_transforms = transforms.Compose([transforms.Resize(224),
+        train_transforms = transforms.Compose([transforms.Resize(256),
                                         transforms.ToTensor(),
+                                        transforms.CenterCrop(224),
                                         ])
-        test_transforms = transforms.Compose([transforms.Resize(224),
+        test_transforms = transforms.Compose([transforms.Resize(256),
                                         transforms.ToTensor(),
+                                        transforms.CenterCrop(224),
                                         ])
         train_data = datasets.ImageFolder(datadir,       
                         transform=train_transforms)
