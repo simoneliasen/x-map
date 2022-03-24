@@ -4,11 +4,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision import transforms, datasets
-import pandas as pd
 import shutil
 import os
 from sklearn.model_selection import KFold
-import time
 
 def label_files(img_dir):
     mypath = 'PP_data'
