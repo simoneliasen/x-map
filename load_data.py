@@ -28,6 +28,7 @@ def get_dataloader(img_dir, batch_size):
     normalize = transforms.Compose([
                         transforms.Resize(256),
                         transforms.Grayscale(1),
+                        transforms.CenterCrop(256),
                         transforms.ToTensor()])
 
     normalized_dataset = datasets.ImageFolder(root = "PP_data", transform = normalize)
@@ -35,6 +36,7 @@ def get_dataloader(img_dir, batch_size):
     transform = transforms.Compose([
                         transforms.Resize(256),
                         transforms.Grayscale(1),
+                        transforms.CenterCrop(256),
                         transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
                         transforms.RandomHorizontalFlip(p=0.3),
                         transforms.RandomAutocontrast(p=0.3),
