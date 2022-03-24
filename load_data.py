@@ -63,7 +63,7 @@ def get_dataloader(img_dir, batch_size):
 
 img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 batchsize = 5
-get_dataloader(img_dir)
+get_dataloader(img_dir, batchsize)
 
 # #iterate through entire dataset and count how many elements there are
 # count = 0
