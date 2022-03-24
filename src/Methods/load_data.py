@@ -63,7 +63,9 @@ def get_dataloader(img_dir, batch_size):
 #Dennis Stationær: D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png
 #Dennis laptop: C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 
-img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
-batchsize = 5
-get_dataloader(img_dir, batchsize)
+
+#usage:
+#img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
+#batchsize = 5
+#get_dataloader(img_dir, batchsize)
 
