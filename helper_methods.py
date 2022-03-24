@@ -7,5 +7,5 @@ def imshow(img):
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show() #Can possibly be deleted, as image is not shown in container, but saved now
-    plt.savefig('test.png')
-    print("Saved image to container\n")
+    #plt.savefig('test.png')
+    #print("Saved image to container\n")
