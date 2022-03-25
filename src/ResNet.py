@@ -29,7 +29,9 @@ class ResNet():
 
         #og vælger bare loss function og optimizer
         self.criterion = nn.NLLLoss()
+        #husk at skriv at vi ikke kun vil tærne på model.fc laget.
         self.optimizer = optim.Adam(self.model.fc.parameters(), lr=0.003)
+        #scheduler her bliver kun brugt i den gamle train.
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, factor = 0.1, patience=5)
         self.model.to(self.device) #load cuda hvis muligt
 
