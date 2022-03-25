@@ -19,7 +19,7 @@ def KfoldTrain(net):
 
         num_epochs=2 # fra 10
         batch_size=64 #fra 128
-        k = 10 # dvs. hver fold er 10 %.
+        k = 10 # dvs. hver fold er 1/10.
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
 
