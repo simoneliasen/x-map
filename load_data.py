@@ -22,8 +22,8 @@ def label_files(img_dir):
             print('Could not categorize file with name %s' % f)
 
 
-def get_dataloader(img_dir, batch_size):
-    label_files(img_dir)
+def load_and_transform_data(img_dir):
+
 
     normalize = transforms.Compose([
                         transforms.Resize(256),
@@ -55,15 +55,27 @@ def get_dataloader(img_dir, batch_size):
     # for idx, (sample, target) in enumerate(concat_dataset):
     #     print(sample, list_of_classes[target] )
 
-    dl_cds = DataLoader(concat_dataset, batch_size = batch_size, shuffle=True)
-    return dl_cds
+    # dl_cds = DataLoader(concat_dataset, batch_size = batch_size, shuffle=True)
+    # return dl_cds
+# from PIL import Image
+# # Opening a multiband image
+# im = Image.open('../PP_data/TB_Negative/CHNCXR_0001_0.png')
+ 
+# # This returns the bands used in im (image)
+# im1 = Image.Image.getbands(im)
+# print(im1)
 
+# im2 = Image.open('../PP_data/TB_Positive/Tuberculosis_1.png')
+ 
+# # This returns the bands used in im (image)
+# im3 = Image.Image.getbands(im2)
+# print(im3)
 
 #Kims Path: 'C:/Users/Monkk/OneDrive/Dokumenter/AAU/CS/CS2/01.P8/Data/ChinaSet_AllFiles/CXR_png'
 #Dennis Stationær: D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png
 #Dennis laptop: C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 
-img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
-batchsize = 5
-get_dataloader(img_dir, batchsize)
+# img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
+# batchsize = 5
+# get_dataloader(img_dir, batchsize)
 
