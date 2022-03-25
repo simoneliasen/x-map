@@ -24,7 +24,10 @@ def KfoldTrain(net):
         foldperf={}
 
         
-
+        #train_idx = ca. 90 % af træningssættet. Eks: [1,3,4,5......]
+        #val_idx = ca. 10 % af træningssættet. Eks: [2, 13......]
+        #og de storer bare indexer. 
+        #og for hver fold skifter værdierne for train_idx og val_idx.
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(dataset)))):
 
             print('Fold {}'.format(fold + 1))
