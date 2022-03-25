@@ -6,9 +6,10 @@ import numpy as np
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
-from torchvision import datasets, transforms, models
+from torchvision import datasets, transforms, models 
 from sklearn.model_selection import KFold
 from torch.utils.data.sampler import SubsetRandomSampler
+from load_data import label_files, load_and_transform_data
 
 
 class ResNet():
@@ -17,7 +18,7 @@ class ResNet():
         self.data_dir = "../PP_data/" # "../ChinaSet_AllFiles/CXR_png/"
         #self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
         self.model = models.resnet50(pretrained=True) #altså den rigtige
-        #self.model = torch.load(self.model_path)
+        self.model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False) #1 kanal da det billedet er grayscale.
         self.model.eval() #?
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(self.device)
@@ -25,12 +26,14 @@ class ResNet():
 
     def load_split_train_test(self, datadir, valid_size = .2):
         train_transforms = transforms.Compose([transforms.Resize(256),
-                                        transforms.ToTensor(),
                                         transforms.CenterCrop(224),
+                                        transforms.Grayscale(1),
+                                        transforms.ToTensor(),
                                         ])
         test_transforms = transforms.Compose([transforms.Resize(256),
-                                        transforms.ToTensor(),
                                         transforms.CenterCrop(224),
+                                        transforms.Grayscale(1),
+                                        transforms.ToTensor(),
                                         ])
         train_data = datasets.ImageFolder(datadir,       
                         transform=train_transforms)
@@ -106,8 +109,9 @@ class ResNet():
 
     def KfoldTrain(self):
         transform_ting = transforms.Compose([transforms.Resize(256),
-                                        transforms.ToTensor(),
                                         transforms.CenterCrop(224),
+                                        transforms.Grayscale(1),
+                                        transforms.ToTensor(),
                                         ])
             
         dataset = datasets.ImageFolder(self.data_dir,       
