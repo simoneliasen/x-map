@@ -1,0 +1,1 @@
+bare test fil for ellers bliver mappen "checkpoints" ikke oprettet.

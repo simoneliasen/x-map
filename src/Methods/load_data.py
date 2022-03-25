@@ -75,7 +75,15 @@ def load_and_transform_data(img_dir):
 #Dennis Stationær: D:/Downloads/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png
 #Dennis laptop: C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 
+<<<<<<< HEAD:load_data.py
 # img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
 # batchsize = 5
 # get_dataloader(img_dir, batchsize)
+=======
+
+#usage:
+#img_dir ='C:/Users/Dennis/Downloads/xrayTB/ChinaSet_AllFiles/ChinaSet_AllFiles/CXR_png'
+#batchsize = 5
+#get_dataloader(img_dir, batchsize)
+>>>>>>> 2f696cae2b8321a87b88feb7e0755d9b19f1f61e:src/Methods/load_data.py
 
