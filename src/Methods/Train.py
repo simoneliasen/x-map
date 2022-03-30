@@ -6,10 +6,12 @@ import numpy as np
 
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net):
-        transform_ting = transforms.Compose([transforms.Resize(256),
-                                        transforms.ToTensor(),
-                                        transforms.CenterCrop(224),
-                                        ])
+        transform_ting = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
             
         data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
         dataset = datasets.ImageFolder(data_dir,       
