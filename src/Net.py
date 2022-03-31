@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch import nn, relu
 from torch import optim
 from torchvision import models
 from Methods.Train import KfoldTrain
@@ -74,8 +74,44 @@ class Net():
             num_features = self.model.fc.in_features
             self.model.fc = nn.Linear(num_features,num_classes)
             self.last_layer_name = "fc"
+        elif model_name == model_names[2]: #squeezenet
+            #virker nok ikke.
+            self.model = models.squeezenet1_1(pretrained=pretrained)
+            print(self.model)
+            self.model.classifier = nn.Sequential(
+                nn.Dropout(p=0.5, inplace=False),
+                nn.Conv2d(512, num_classes, kernel_size=(1, 1), stride=(1, 1)),
+                nn.ReLU(inplace=True),
+                nn.AdaptiveAvgPool2d(output_size=(1, 1))
+            )
+            self.last_layer_name = "classifier"
+        elif model_name == model_names[3]: #chexnet
+            self.model = models.densenet121(pretrained=pretrained)
+            print(self.model)
+            num_features = self.model.classifier.in_features
+            self.model.classifier = nn.Sequential(
+            nn.Linear(num_features, num_classes),
+            nn.Sigmoid()
+            )
+            self.last_layer_name = "classifier"
+        elif model_name == model_names[4]: #vgg19
+            self.model = models.vgg19(pretrained=pretrained)
+            self.model.classifier = nn.Sequential(
+                nn.Linear(in_features=25088, out_features=4096, bias=True),
+                nn.ReLU(inplace=True),
+                nn.Dropout(p=0.5, inplace=False),
+                nn.Linear(in_features=4096, out_features=4096, bias=True),
+                nn.ReLU(inplace=True),
+                nn.Dropout(p=0.5, inplace=False),
+                nn.Linear(in_features=4096, out_features=num_classes, bias=True)
+            )
+            self.last_layer_name = "classifier"
+            print(self.model)
             
 
-model_names = ["densenet", "resnet"]
-net = Net(model_names[0])
+model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg"]
+net = Net(model_names[4])
 KfoldTrain(net)
+
+#husk grayscale ting!!
+#og husk det med at se på hvor sikker man er i sin prediction.
