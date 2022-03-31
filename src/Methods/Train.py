@@ -7,8 +7,8 @@ import numpy as np
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net):
         transform_ting = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize(net.input_size + 32), #fordi 224 + 32 = 256.
+            transforms.CenterCrop(net.input_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
@@ -16,6 +16,7 @@ def KfoldTrain(net):
         data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
         dataset = datasets.ImageFolder(data_dir,       
                         transform=transform_ting)
+        #imagefolder konverterer vidst selv til RGB.
 
         torch.manual_seed(42)
 
@@ -44,8 +45,8 @@ def KfoldTrain(net):
             history = {'train_loss': [], 'test_loss': [],'train_acc':[],'test_acc':[]}
 
             for epoch in range(num_epochs):
-                train_loss, train_correct=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer)
-                test_loss, test_correct=valid_epoch(net.model,device,test_loader,net.criterion)
+                train_loss, train_correct=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
+                test_loss, test_correct=valid_epoch(net.model,device,test_loader,net.criterion, net.is_inception)
 
                 train_loss = train_loss / len(train_loader.sampler)
                 train_acc = train_correct / len(train_loader.sampler) * 100
@@ -65,15 +66,23 @@ def KfoldTrain(net):
 
             foldperf['fold{}'.format(fold+1)] = history  
 
-def train_epoch(model,device,dataloader,loss_fn,optimizer):
+def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
         train_loss,train_correct=0.0,0
         model.train()
         for images, labels in dataloader:
 
             images,labels = images.to(device),labels.to(device)
             optimizer.zero_grad()
-            output = model(images)
-            loss = loss_fn(output,labels)
+
+            if is_inception:
+                output, aux_outputs = model(images)
+                loss1 = loss_fn(output, labels)
+                loss2 = loss_fn(aux_outputs, labels)
+                loss = loss1 + 0.4*loss2
+            else:
+                output = model(images)
+                loss = loss_fn(output,labels)
+
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * images.size(0)
@@ -82,14 +91,17 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer):
 
         return train_loss,train_correct
   
-def valid_epoch(model,device,dataloader,loss_fn):
+def valid_epoch(model,device,dataloader,loss_fn, is_inception):
     valid_loss, val_correct = 0.0, 0
     model.eval()
     for images, labels in dataloader:
 
         images,labels = images.to(device),labels.to(device)
+        #lav
+
         output = model(images)
-        loss=loss_fn(output,labels)
+        loss = loss_fn(output,labels)
+
         valid_loss+=loss.item()*images.size(0)
         scores, predictions = torch.max(output.data,1)
         val_correct+=(predictions == labels).sum().item()

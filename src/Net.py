@@ -11,6 +11,8 @@ class Net():
         self.model_path = './resnet.pth'
         self.data_dir = "../PP_data/" #skal være opdelt i TB_positive og TB_negative
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.is_inception = False
+        self.input_size = 224
         print(self.device)
         
         self.load_model(model_name, pretrained, num_classes)
@@ -106,11 +108,24 @@ class Net():
                 nn.Linear(in_features=4096, out_features=num_classes, bias=True)
             )
             self.last_layer_name = "classifier"
-            print(self.model)
+        elif model_name == model_names[5]: #densenet201
+            self.model = models.densenet201(pretrained=pretrained)
+            num_features = self.model.classifier.in_features 
+            #densenet har 1024 in_features hvilket jo skal angives i classifieren - num_features.
+            self.model.classifier = nn.Linear(num_features,num_classes)
+            self.last_layer_name = "classifier"
+        elif model_name == model_names[6]: #inception v3
+            self.is_inception = True
+            self.model = models.inception_v3(pretrained=pretrained)
+            self.model.AuxLogits.fc = nn.Linear(768, num_classes)
+            self.model.fc = nn.Linear(2048, num_classes)
+            self.last_layer_name = "fc"
+            self.input_size = 299
+            
             
 
-model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg"]
-net = Net(model_names[4])
+model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg", "densenet201", "inception"]
+net = Net(model_names[6])
 KfoldTrain(net)
 
 #husk grayscale ting!!
