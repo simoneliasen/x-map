@@ -23,6 +23,7 @@ class Net():
         #self.criterion = nn.NLLLoss() #virkede ikke med densenet. Spørg mig ikke hvorfor.
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
         self.set_optimizer(optim.Adam,feature_extract,self.last_layer_name, lr=0.003)
+        #self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
         #self.print_parems_to_update(feature_extract)
         self.model.to(self.device)
 
@@ -97,16 +98,10 @@ class Net():
             )
             self.last_layer_name = "classifier"
         elif model_name == model_names[4]: #vgg19
-            self.model = models.vgg19(pretrained=pretrained)
-            self.model.classifier = nn.Sequential(
-                nn.Linear(in_features=25088, out_features=4096, bias=True),
-                nn.ReLU(inplace=True),
-                nn.Dropout(p=0.5, inplace=False),
-                nn.Linear(in_features=4096, out_features=4096, bias=True),
-                nn.ReLU(inplace=True),
-                nn.Dropout(p=0.5, inplace=False),
-                nn.Linear(in_features=4096, out_features=num_classes, bias=True)
-            )
+            #self.model = models.vgg19(pretrained=pretrained)
+            self.model = models.vgg11_bn(pretrained=pretrained)
+            print(self.model)
+            self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
             self.last_layer_name = "classifier"
         elif model_name == model_names[5]: #densenet201
             self.model = models.densenet201(pretrained=pretrained)
@@ -125,7 +120,7 @@ class Net():
             
 
 model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg", "densenet201", "inception"]
-net = Net(model_names[6])
+net = Net(model_names[4])
 KfoldTrain(net)
 
 #husk grayscale ting!!
