@@ -4,12 +4,21 @@ from torch import optim
 from torchvision import models
 from Methods.Train import KfoldTrain
 
+import argparse
+
+# Create the parser
+parser = argparse.ArgumentParser()
+# Add an argument
+parser.add_argument('--data_path', type=str, required=False, default='../PP_data/')
+# Parse the argument
+args = parser.parse_args()
+
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
 class Net():
     def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 2): #features = tb positive/negative
         self.model_path = './resnet.pth'
-        self.data_dir = "../PP_data/" #skal være opdelt i TB_positive og TB_negative
+        self.data_dir = args.data_path #skal være opdelt i TB_positive og TB_negative
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.is_inception = False
         self.input_size = 224
