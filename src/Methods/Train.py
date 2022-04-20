@@ -13,7 +13,7 @@ def KfoldTrain(net):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
             
-        data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
+        data_dir = net.data_dir # husk opdelt i TP_positive, TP_positive
         dataset = datasets.ImageFolder(data_dir,       
                         transform=transform_ting)
         #imagefolder konverterer vidst selv til RGB.
