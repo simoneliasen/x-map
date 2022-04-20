@@ -80,7 +80,6 @@ class Net():
         elif model_name == model_names[2]: #squeezenet
             #virker nok ikke.
             self.model = models.squeezenet1_1(pretrained=pretrained)
-            print(self.model)
             self.model.classifier = nn.Sequential(
                 nn.Dropout(p=0.5, inplace=False),
                 nn.Conv2d(512, num_classes, kernel_size=(1, 1), stride=(1, 1)),
@@ -90,7 +89,6 @@ class Net():
             self.last_layer_name = "classifier"
         elif model_name == model_names[3]: #chexnet
             self.model = models.densenet121(pretrained=pretrained)
-            print(self.model)
             num_features = self.model.classifier.in_features
             self.model.classifier = nn.Sequential(
             nn.Linear(num_features, num_classes),
@@ -100,7 +98,6 @@ class Net():
         elif model_name == model_names[4]: #vgg19
             #self.model = models.vgg19(pretrained=pretrained)
             self.model = models.vgg11_bn(pretrained=pretrained)
-            print(self.model)
             self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
             self.last_layer_name = "classifier"
         elif model_name == model_names[5]: #densenet201
