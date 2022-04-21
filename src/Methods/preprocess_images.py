@@ -6,9 +6,9 @@ from PIL import Image
 import PIL
 import math
 
-imgpath = r"..\mask_test\imgs"
+imgpath = r"..\PP_data2\TB_positive"
 imgs = [f for f in listdir(imgpath) if isfile(join(imgpath, f))]
-maskpath = r"..\mask_test\masks"
+maskpath = r"..\PP_data2\TB_negative"
 masks = [f for f in listdir(maskpath) if isfile(join(maskpath, f))]
 
 masked_img_path = r"..\mask_test\masked_img"
@@ -39,7 +39,7 @@ def generate_masked_imgs():
         #im.show()
         im.save(f"{masked_img_path}\\{img}")
 
-generate_masked_imgs()
+#generate_masked_imgs()
 
 
 
@@ -82,17 +82,17 @@ def add_mask2name():
         os.rename(path, new_path)
 
 def downscale():
-    #for img in imgs[1:]:
-    #    path = f"{imgpath}\\{img}"
-    #    im = Image.open(path)
-    #    width, height = im.size
-    #    new_width = round(width / 10)
-    #    new_height = round(height / 10)
-    #    new_size = (new_width, new_height)
-    #    new = im.resize(new_size)
-    #    new.save(path)
+    for img in imgs:
+        path = f"{imgpath}\\{img}"
+        im = Image.open(path)
+        width, height = im.size
+        new_width = round(width / 10)
+        new_height = round(height / 10)
+        new_size = (new_width, new_height)
+        new = im.resize(new_size)
+        new.save(path)
 
-    for mask in masks[1:]:
+    for mask in masks:
         path = f"{maskpath}\\{mask}"
         im = Image.open(path)
         width, height = im.size
@@ -131,4 +131,5 @@ def convert_mask2p():
         im = im.convert('P')
         im.save(new_path)
 
+downscale()
 

@@ -3,7 +3,10 @@ from sklearn.model_selection import KFold
 import torch
 from torch.utils.data.sampler import SubsetRandomSampler
 import numpy as np
+from Methods.wandb import wandb_log
+from Methods.parser import get_arguments
 
+args = get_arguments()
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net):
         transform_ting = transforms.Compose([
@@ -21,7 +24,7 @@ def KfoldTrain(net):
         torch.manual_seed(42)
 
         num_epochs=2 # fra 10
-        batch_size=8 #fra 128
+        batch_size=net.batch_size #fra 128
         k = 10 # dvs. hver fold er 1/10.
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
@@ -32,6 +35,8 @@ def KfoldTrain(net):
         #og de storer bare indexer. 
         #og for hver fold skifter værdierne for train_idx og val_idx.
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(dataset)))):
+            print('lr: ', net.lr)
+            print('batch_size: ', net.batch_size)
 
             print('Fold {}'.format(fold + 1))
 
@@ -63,6 +68,8 @@ def KfoldTrain(net):
                 history['test_loss'].append(test_loss)
                 history['train_acc'].append(train_acc)
                 history['test_acc'].append(test_acc)
+                if args.wandb:
+                    wandb_log(train_loss, test_loss, train_acc, test_acc)
 
             foldperf['fold{}'.format(fold+1)] = history  
 

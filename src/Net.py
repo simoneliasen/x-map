@@ -2,16 +2,10 @@ import torch
 from torch import nn, relu
 from torch import optim
 from torchvision import models
-from Methods.Train import KfoldTrain
+from Methods.wandb import wandb_initialize
+from Methods.parser import get_arguments
 
-import argparse
-
-# Create the parser
-parser = argparse.ArgumentParser()
-# Add an argument
-parser.add_argument('--data_path', type=str, required=False, default='../PP_data/')
-# Parse the argument
-args = parser.parse_args()
+args = get_arguments()
 
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
@@ -28,13 +22,27 @@ class Net():
 
         self.model.eval()
         self.set_parameter_requires_grad(self.model, feature_extract, self.last_layer_name)
-
-        #self.criterion = nn.NLLLoss() #virkede ikke med densenet. Spørg mig ikke hvorfor.
-        self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
-        self.set_optimizer(optim.Adam,feature_extract,self.last_layer_name, lr=0.003)
-        #self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-        #self.print_parems_to_update(feature_extract)
         self.model.to(self.device)
+
+        #start træningen:
+        if args.wandb:
+            wandb_initialize(self)
+        else:
+            self.set_hyperparameters()
+            from Methods.Train import KfoldTrain
+            KfoldTrain(self)
+
+    def set_hyperparameters(self, parameters=None):
+        self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
+
+        if parameters is None:
+            self.batch_size = 4
+            lr=0.001
+            self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
+        else:
+            self.lr = parameters['lr']
+            self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9)
+            self.batch_size = parameters['batch_size']
 
     def set_parameter_requires_grad(self, model, feature_extracting, last_layer_name):
         #altså hvis vi kun vil træne det sidste layer (classifier) så freezer vi alle andre layers.
@@ -126,8 +134,7 @@ class Net():
             
 
 model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg", "densenet201", "inception"]
-net = Net(model_names[4])
-KfoldTrain(net)
+net = Net(model_names[1])
 
 #husk grayscale ting!!
 #og husk det med at se på hvor sikker man er i sin prediction.
