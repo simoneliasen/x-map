@@ -1,4 +1,8 @@
+from copy import deepcopy
 from pickletools import float8
+from pyexpat import model
+from sklearn.metrics import confusion_matrix
+from sklearn.utils import shuffle
 from torchvision import datasets, transforms, models
 from sklearn.model_selection import KFold
 import torch
@@ -7,9 +11,8 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter 
 from datetime import datetime
 import random
+import copy
 
-
-            
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net, model_name, checkpoint_every):
         transform_ting = transforms.Compose([
@@ -19,7 +22,9 @@ def KfoldTrain(net, model_name, checkpoint_every):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
 
-                           
+
+        parameterDefault = copy.deepcopy(net.model.state_dict())
+        optimizerDefault = copy.deepcopy(net.optimizer.state_dict())            
         data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
         
 
@@ -29,12 +34,12 @@ def KfoldTrain(net, model_name, checkpoint_every):
         #imagefolder konverterer vidst selv til RGB.
 
         torch.manual_seed(42)
-        random.seed(42)
+        np.random.seed(42)
         
 
 
-        batch_size=2 #fra 128
-        k = 10 # dvs. hver fold er 1/10.
+        batch_size=4 #fra 128
+        k = 5 # dvs. hver fold er 1/10.
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
 
@@ -45,7 +50,7 @@ def KfoldTrain(net, model_name, checkpoint_every):
         #og for hver fold skifter værdierne for train_idx og val_idx.
 
         #variable to get the correct number of steps or image processed in tensorboard
-        total_steps = 0
+
 
 
         num_train = len(dataset)
@@ -59,9 +64,24 @@ def KfoldTrain(net, model_name, checkpoint_every):
         #KFold_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=KFold_sampler)
         test_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_sampler)
 
+
+        #To get final test result for all folds
+        Total_Test_Avg_Loss = 0
+        Total_Test_Avg_Acc = 0
+
        #print(len(KFold_loader),len(test_loader))
 
+       
+
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFold_sampler)))):
+            net.model.load_state_dict(parameterDefault)
+            net.optimizer.load_state_dict(optimizerDefault)
+            #net.optimizer.state_dict = net3
+            # if 1 == 1:
+            # #if fold > 2:
+            #     for name, param in net2.model.named_parameters():
+            #         if param.requires_grad:
+            #             print(name, param.data)
 
             print('Fold {}'.format(fold + 1))
 
@@ -70,6 +90,7 @@ def KfoldTrain(net, model_name, checkpoint_every):
             now = datetime.now()
             time_string = str(now.strftime("%d.%m.%Y.%H.%M.%S"))
             writter = SummaryWriter("runs/{}_{}_{}".format(fold + 1,model_name_string,time_string))
+            total_steps = 0
 
             train_sampler = SubsetRandomSampler(train_idx)
             val_sampler = SubsetRandomSampler(val_idx)
@@ -84,16 +105,28 @@ def KfoldTrain(net, model_name, checkpoint_every):
 
              # Early stopping
             last_loss = 100
-            patience = 2
+            patience = 0
             trigger_times = 0
             epoch = 0
             
             while epoch < 500:
                 epoch += 1 
-                
-                train_loss, train_correct=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
+                             
+                train_loss, train_correct, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
                 train_loss = train_loss / len(train_loader.sampler)
-                train_acc = train_correct / len(train_loader.sampler) * 100
+                train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
+
+                tn=CMTRAIN[0][0]
+                tp=CMTRAIN[1][1]
+                fp=CMTRAIN[0][1]
+                fn=CMTRAIN[1][0]
+
+                train_sensitivity= (tp/(tp+fn))*100
+                train_precision= (tp/(tp+fp))*100
+                train_specificity= (tn/(tn+fp))*100
+                train_FalseNegativeRate= (1-(tp/(tp+fn)))*100
+                train_FalsePositiveRate = (1-(tn/(tn+fp)))*100
+               
 
                 #history['train_loss'].append(train_loss)            
                 #history['train_acc'].append(train_acc)
@@ -103,17 +136,37 @@ def KfoldTrain(net, model_name, checkpoint_every):
 
                 #Her ændres hvor tit man vil tage checkpoint, 1 = hver gang
                 if epoch % checkpoint_every == 0:
-                    save_checkpoint(model_name, net, epoch)
+                    save_checkpoint(model_name, net, epoch, fold)
 
-                    val_loss, val_correct=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
+                    val_loss, val_correct, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
                     val_loss = val_loss / len(val_loader.sampler)
-                    val_acc = val_correct / len(val_loader.sampler) * 100 
+                    val_acc = (np.sum(np.diag(CMVAL)/np.sum(CMVAL))*100)
+                    tn1=CMVAL[0][0]
+                    tp1=CMVAL[1][1]
+                    fp1=CMVAL[0][1]
+                    fn1=CMVAL[1][0]
+                    Val_sensitivity= (tp1/(tp1+fn1))*100
+                    val_precision= (tp1/(tp1+fp1))*100
+                    val_specificity= (tn1/(tn1+fp1))*100
+                    val_FalseNegativeRate= (1-(tp1/(tp1+fn1)))*100
+                    val_FalsePositiveRate = (1-(tn1/(tn1+fp1)))*100
+
                     
                     #writes to the SummaryWritten tensorboard object. 
                     writter.add_scalar('TraniningLoss', train_loss, total_steps)
                     writter.add_scalar('TraniningAccuracy', train_acc, total_steps)
+                    writter.add_scalar('TraniningSensitivity', train_sensitivity, total_steps)
+                    writter.add_scalar('TraniningPrecision', train_precision, total_steps)
+                    writter.add_scalar('TraniningSpecificity', train_specificity, total_steps)
+                    writter.add_scalar('TraniningFalseNegativeRate', train_FalseNegativeRate, total_steps)
+                    writter.add_scalar('TraniningFalsePositiveRate', train_FalsePositiveRate, total_steps)
                     writter.add_scalar('ValLoss', val_loss, total_steps)
                     writter.add_scalar('ValAccuracy', val_acc, total_steps)
+                    writter.add_scalar('ValSensitivity', Val_sensitivity, total_steps)
+                    writter.add_scalar('ValPrecision', val_precision, total_steps)
+                    writter.add_scalar('ValSpecificity', val_specificity, total_steps)
+                    writter.add_scalar('ValFalseNegativeRate', val_FalseNegativeRate, total_steps)
+                    writter.add_scalar('ValFalsePositiveRate', val_FalsePositiveRate, total_steps)
 
 
 
@@ -127,26 +180,63 @@ def KfoldTrain(net, model_name, checkpoint_every):
                     history['train_acc'].append(train_acc)
                     history['val_acc'].append(val_acc)
 
-                    print('The Current Loss:', val_loss)
+                    #print('The Current Loss:', val_loss)
 
                     early_stopping_val_loss = val_loss
                     early_stopping_val_loss = format(early_stopping_val_loss, '.4f')
                     early_stopping_last_loss = last_loss
                     early_stopping_last_loss = format(early_stopping_last_loss, '.4f')
-    
+                    
                     if early_stopping_val_loss > early_stopping_last_loss:
+
                         trigger_times += 1
                         print('Trigger Times:', trigger_times)
-    
+                        
                         if trigger_times >= patience:
                             epoch = 505
-                            print('Early stopping!\nStart to test process.')
+                            print('Early stopping!\nStarting the test process.')
                             foldperf['fold{}'.format(fold+1)] = history
+                            # x  = 0
+                            # avg_test_loss = 0
+                            # avg_test_acc = 0
 
-                            test_loss, test_correct= test_method(net.model,device,test_loader,net.criterion, net.is_inception)
-                            test_correct = test_correct/ len(test_loader.sampler) * 100
-                            print(test_loss,test_correct)
                             
+                            test_loss, test_correct, CMTEST= test_method(net.model,device,test_loader,net.criterion, net.is_inception)
+                            test_loss = test_loss / len(test_loader.sampler)
+                            test_correct = (np.sum(np.diag(CMTEST)/np.sum(CMTEST))*100)
+                            tn2=CMTEST[0][0]
+                            tp2=CMTEST[1][1]
+                            fp2=CMTEST[0][1]
+                            fn2=CMTEST[1][0]
+                            test_sensitivity= (tp2/(tp2+fn2))*100
+                            test_precision= (tp2/(tp2+fp2))*100
+                            test_specificity= (tn2/(tn2+fp2))*100
+                            test_FalseNegativeRate= (1-(tp2/(tp2+fn2)))*100
+                            test_FalsePositiveRate = (1-(tn2/(tn2+fp2)))*100
+
+
+                            #print("Test:{} Test Loss:{:.8f}, Test Acc:{:.8f} %".format(x, test_loss,test_correct))
+                            # avg_test_loss += test_loss
+                            # avg_test_acc += test_correct
+                                
+                            # avg_test_loss = avg_test_loss / 10
+                            # avg_test_acc = avg_test_acc / 10
+                            Total_Test_Avg_Loss += test_loss
+                            Total_Test_Avg_Acc += test_correct
+                            Total_Test_Avg_Sensitivity += test_sensitivity
+                            Total_Test_Avg_precision += test_precision
+                            Total_Test_Avg_specificity += test_specificity
+                            Total_Test_Avg_FalseNegativeRate += test_FalseNegativeRate
+                            Total_Test_Avg_FalsePositiveRate += test_FalsePositiveRate
+                            writter.add_scalar('TestLoss', test_loss, fold)
+                            writter.add_scalar('TestAccuracy', test_correct, fold)
+                            writter.add_scalar('TestSensitivity', test_sensitivity, fold)
+                            writter.add_scalar('TestPrecision', test_precision, fold)
+                            writter.add_scalar('TestSpecificity', test_specificity, fold)
+                            writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
+                            writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
+                            print("Test Loss:{:.8f}, Avg Test Acc:{:.8f} %, Avg Test Sensitivity:{:.8f} %, Avg Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
+                                
                     else:
                         print('trigger times: 0')
                         trigger_times = 0
@@ -156,16 +246,33 @@ def KfoldTrain(net, model_name, checkpoint_every):
                                                                                             train_loss,                                                                                       
                                                                                             train_acc))
 
-            #foldperf['fold{}'.format(fold+1)] = history  
+        Total_Test_Avg_Loss = Total_Test_Avg_Loss / k
+        Total_Test_Avg_Acc = Total_Test_Avg_Acc / k
+        Total_Test_Avg_Sensitivity = Total_Test_Avg_Sensitivity / k
+        Total_Test_Avg_precision = Total_Test_Avg_precision / k
+        Total_Test_Avg_specificity = Total_Test_Avg_specificity / k
+        Total_Test_Avg_FalseNegativeRate = Total_Test_Avg_FalseNegativeRate / k
+        Total_Test_Avg_FalsePositiveRate = Total_Test_Avg_FalsePositiveRate / k
+        print("Total Avg Test Loss:{:.8f}, Total Avg Test Acc:{:.8f} %".format(Total_Test_Avg_Loss, Total_Test_Avg_Acc))
+        writter.add_scalar('TotalAVGTestLoss', Total_Test_Avg_Loss, fold)
+        writter.add_scalar('TotalAVGTestAccuracy', Total_Test_Avg_Acc, fold)
+        writter.add_scalar('TotalAVGTestSensitivity', Total_Test_Avg_Sensitivity, fold)
+        writter.add_scalar('TotalAVGTestPrecision', Total_Test_Avg_precision, fold)
+        writter.add_scalar('TotalAVGTestSpecificity', Total_Test_Avg_specificity, fold)
+        writter.add_scalar('TotalAVGTestFalseNegativeRate', Total_Test_Avg_FalseNegativeRate, fold)
+        writter.add_scalar('TotalAVGTestFalsePositiveRate', Total_Test_Avg_FalsePositiveRate, fold)
 
-def save_checkpoint(model_name, net, epoch):
+
+
+def save_checkpoint(model_name, net, epoch, fold):
         print("CHECKPOINT")
         now = datetime.now()
         epoch_string = str(epoch)
+        fold_string = str(fold)
         model_name_string = str(model_name)
         time_string = str(now.strftime("%d.%m.%Y.%H.%M.%S"))
-        model_file_string = f"./checkpoints/{model_name_string}/model/modelcheckpoint-{epoch_string}-{model_name_string}-{time_string}.pth"
-        optimizer_file_string = f"./checkpoints/{model_name_string}/optimizer/optimizercheckpoint-{epoch_string}-{model_name_string}-{time_string}.pth"
+        model_file_string = f"./checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{epoch_string}-{model_name_string}-{time_string}.pth"
+        optimizer_file_string = f"./checkpoints/{model_name_string}/optimizer/optimizercheckpoint-{fold_string}-{epoch_string}-{model_name_string}-{time_string}.pth"
         model_FILE = model_file_string
         optimizer_FILE = optimizer_file_string
         torch.save(net.model.state_dict(), model_FILE)
@@ -173,6 +280,7 @@ def save_checkpoint(model_name, net, epoch):
 
 def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
         train_loss,train_correct=0.0,0
+        CMTRAIN = 0
         model.train()
         for images, labels in dataloader:
             
@@ -194,11 +302,13 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
             train_loss += loss.item() * images.size(0)
             scores, predictions = torch.max(output.data, 1)
             train_correct += (predictions == labels).sum().item()
+            CMTRAIN+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1])           
 
-        return train_loss,train_correct
+        return train_loss,train_correct,CMTRAIN
   
 def valid_epoch(model,device,dataloader,loss_fn, is_inception):
     valid_loss, val_correct = 0.0, 0
+    CMVAL = 0
     model.eval()
     for images, labels in dataloader:
 
@@ -211,12 +321,14 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
         valid_loss+=loss.item()*images.size(0)
         scores, predictions = torch.max(output.data,1)
         val_correct+=(predictions == labels).sum().item()
+        CMVAL+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
-    return valid_loss,val_correct
+    return valid_loss,val_correct, CMVAL
 
 
 def test_method(model,device,dataloader,loss_fn, is_inception):
     test_loss, test_correct = 0.0, 0
+    CMTEST = 0
     model.eval()
     for images, labels in dataloader:
 
@@ -229,5 +341,8 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
         test_loss+=loss.item()*images.size(0)
         scores, predictions = torch.max(output.data,1)
         test_correct+=(predictions == labels).sum().item()
+        CMTEST+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
-    return test_loss,test_correct
+    return test_loss,test_correct, CMTEST
+
+

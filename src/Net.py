@@ -5,6 +5,8 @@ from torchvision import models
 from Methods.Train import KfoldTrain
 import glob 
 import os
+import copy
+
 
 
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
@@ -143,7 +145,7 @@ class Net():
             self.model = models.efficientnet_b7(pretrained=pretrained)
             self.model.classifier = nn.Sequential(
                 nn.Dropout(p=0.5, inplace=True),
-                nn.Linear(in_features=2560, out_features=1000, bias=True),
+                nn.Linear(in_features=2560, out_features=num_classes, bias=True),
             )
             self.last_layer_name = "classifier"
             
@@ -153,7 +155,8 @@ class Net():
 
 model_names = ["densenet", "resnext", "squeezenet", "chexnet", "vgg", "densenet201", "inception","efficientnet"]
 net = Net(model_names[0])
-KfoldTrain(net, model_names[0], checkpoint_every = 3)
+KfoldTrain(net, model_names[0], checkpoint_every=3)
+
 
 #husk grayscale ting!!
 #og husk det med at se på hvor sikker man er i sin prediction.
