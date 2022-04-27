@@ -45,9 +45,17 @@ class Net():
         else:
             print("parameters er:")
             print(parameters)
-            self.lr = parameters['lr']
-            self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9)
             self.batch_size = parameters['batch_size']
+            self.exponential_scheduler = parameters['exponential_scheduler']
+            self.lr = parameters['lr']
+            self.weight_decay = parameters['weight_decay']
+            self.dropout_rate = parameters['dropout_rate']
+
+            if parameters['optimizer'] == "sgd":
+                self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9, weight_decay=self.weight_decay)
+            elif parameters['optimizer'] == "rmsprop":
+                self.optimizer = optim.RMSprop(self.model.parameters(), lr=self.lr, momentum=0.9, weight_decay=self.weight_decay)
+            
 
     def set_parameter_requires_grad(self, model, feature_extracting, last_layer_name):
         #altså hvis vi kun vil træne det sidste layer (classifier) så freezer vi alle andre layers.
