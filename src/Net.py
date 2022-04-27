@@ -65,7 +65,7 @@ class Net():
 
     def load_model(self, model_name, pretrained, num_classes):
         if model_name == "densenet":
-            self.model = models.densenet161(pretrained=pretrained)
+            self.model = models.densenet121(pretrained=pretrained)
             num_features = self.model.classifier.in_features 
             self.model.classifier = nn.Linear(num_features,num_classes)
 
