@@ -143,11 +143,18 @@ class Net():
             self.model.fc = nn.Linear(2048, num_classes)
             self.last_layer_name = "fc"
             self.input_size = 299
+        elif model_name == model_names[7]: #efficientnet
+            self.model = models.efficientnet_b7(pretrained=pretrained)
+            self.model.classifier = nn.Sequential(
+                nn.Dropout(p=0.5, inplace=True),
+                nn.Linear(in_features=2560, out_features=num_classes, bias=True),
+            )
+            self.last_layer_name = "classifier"
             
             
 
-model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg", "densenet201", "inception"]
-net = Net(model_names[4])
+model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg", "densenet201", "inception", "efficientnet"]
+net = Net(model_names[7])
 
 #husk grayscale ting!!
 #og husk det med at se på hvor sikker man er i sin prediction.
