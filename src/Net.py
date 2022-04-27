@@ -29,6 +29,7 @@ class Net():
             wandb_initialize(self)
         else:
             self.set_hyperparameters()
+            self.batch_size = 256 #bare en test
             from Methods.Train import KfoldTrain
             KfoldTrain(self)
 
@@ -134,7 +135,7 @@ class Net():
             
 
 model_names = ["densenet", "resnet", "squeezenet", "chexnet", "vgg", "densenet201", "inception"]
-net = Net(model_names[1])
+net = Net(model_names[4])
 
 #husk grayscale ting!!
 #og husk det med at se på hvor sikker man er i sin prediction.
