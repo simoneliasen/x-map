@@ -30,7 +30,7 @@ class Net():
             wandb_initialize(self)
         else:
             self.set_hyperparameters()
-            self.batch_size = 256 #bare en test
+            self.batch_size = 128 #bare en test
             from Methods.Train import KfoldTrain
             KfoldTrain(self)
 
