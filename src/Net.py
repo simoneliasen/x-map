@@ -144,7 +144,7 @@ class Net():
             self.last_layer_name = "fc"
             self.input_size = 299
         elif model_name == model_names[7]: #efficientnet
-            self.model = models.efficientnet_b7(pretrained=pretrained)
+            self.model = models.efficientnet_b0(pretrained=pretrained)
             self.model.classifier = nn.Sequential(
                 nn.Dropout(p=0.5, inplace=True),
                 nn.Linear(in_features=2560, out_features=num_classes, bias=True),
