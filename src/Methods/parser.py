@@ -9,7 +9,11 @@ def get_arguments():
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--no-wandb', action='store_false')
     parser.set_defaults(wandb=True)
-    parser.add_argument("--sweep", help="run sweep on hyperparameters for tuning", default=False, action=argparse.BooleanOptionalAction)
+
+    parser.add_argument('--sweep', action='store_true')
+    parser.add_argument('--no-sweep', action='store_false')
+    parser.set_defaults(sweep=False)
+    
     # Parse the argument
     args = parser.parse_args()
     return args
