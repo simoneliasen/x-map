@@ -6,6 +6,7 @@ from Methods.wandb import wandb_initialize
 from Methods.parser import get_arguments
 
 args = get_arguments()
+print(args)
 
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
