@@ -38,11 +38,13 @@ class Net():
     def set_hyperparameters(self, parameters=None):
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
-        if parameters is None:
+        if parameters is None: #altså ingen wandb
             self.batch_size = 4
             self.lr=0.001
             self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9)
         else:
+            print("parameters er:")
+            print(parameters)
             self.lr = parameters['lr']
             self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9)
             self.batch_size = parameters['batch_size']

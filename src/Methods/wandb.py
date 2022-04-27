@@ -1,17 +1,29 @@
 import wandb
 
 sweep_config = {
-    'method': 'random', #grid, random, bayesian
+    'method': 'bayes', #grid, random, bayesian
     'metric': {
     'name': 'test_acc',
     'goal': 'maximize'   
         },
     'parameters': {
         'batch_size': { 
-            'values': [2, 4, 3] 
+            'values': [32, 64, 128] 
+        },
+        'optimizer': {
+            'values': ['sgd', 'rmsprop']
+        },
+        'exponential_scheduler': { 
+            'values': [0.01, 0.025, 0.05] 
         },
         'lr': { 
-            'values': [0.000005, 0.00005, 0.0005]
+            'values': [0.1, 0.01, 0.001]
+        },
+        'weight_decay': { 
+            'values': [0.0001, 0.000005]
+        },
+        'dropout_rate': { 
+            'values': [0, 0.2, 0.5]
         },
     }
 }
@@ -22,16 +34,8 @@ def wandb_initialize(net):
     global _net
     _net = net
     sweep_id = wandb.sweep(sweep_config, project="my-test-project", entity="thebigyesman")
-    wandb.agent('f7pvbfd4', function=sweep)
-
-    #wandb.init(project="my-test-project", entity="thebigyesman")
-
-    #wandb.config = {
-    #"learning_rate": 0.001,
-    #"epochs": 100,
-    #"batch_size": 128
-    #}
-
+    wandb.agent(sweep_id=sweep_id, function=sweep)
+    #kan også bruge et specifikt sweep_id, fx f7pvbfd4 (find på wandb under sweeps)
     #wandb.watch(model)
 
 def wandb_log(train_loss, test_loss, train_acc, test_acc):
@@ -42,9 +46,6 @@ def wandb_log(train_loss, test_loss, train_acc, test_acc):
 
 def sweep():
     wandb.init(config=sweep_config)
-    parameters = dict()
-    parameters['batch_size'] = wandb.config['batch_size']
-    parameters['lr'] = wandb.config['lr'] #try same for both
-    _net.set_hyperparameters(parameters)
+    _net.set_hyperparameters(wandb.config)
     from Methods.Train import KfoldTrain
     KfoldTrain(_net)
