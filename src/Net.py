@@ -37,7 +37,11 @@ class Net():
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None: #altså ingen wandb
-            self.batch_size = 128
+            if args.batch_size == None:
+                self.batch_size = 64
+            else:
+                self.batch_size = args.batch_size
+            
             self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
         else:
             self.batch_size = params['batch_size']
