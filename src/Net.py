@@ -6,6 +6,7 @@ from Methods.wandb import wandb_initialize
 from Methods.parser import get_arguments
 
 args = get_arguments()
+print(args)
 
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
@@ -39,8 +40,8 @@ class Net():
 
         if parameters is None:
             self.batch_size = 4
-            lr=0.001
-            self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
+            self.lr=0.001
+            self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9)
         else:
             self.lr = parameters['lr']
             self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.9)
