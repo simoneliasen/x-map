@@ -35,9 +35,6 @@ def KfoldTrain(net):
         #og de storer bare indexer. 
         #og for hver fold skifter værdierne for train_idx og val_idx.
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(dataset)))):
-            print('lr: ', net.lr)
-            print('batch_size: ', net.batch_size)
-
             print('Fold {}'.format(fold + 1))
 
             train_sampler = SubsetRandomSampler(train_idx)
