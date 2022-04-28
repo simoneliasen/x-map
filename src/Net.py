@@ -43,15 +43,17 @@ class Net():
                 self.batch_size = args.batch_size
             
             self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
+            self.scheduler = None
         else:
             self.batch_size = params['batch_size']
-            self.exponential_scheduler = params['exponential_scheduler']
             self.set_dropout(params['dropout_rate'])
 
             if params['optimizer'] == "sgd":
                 self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
             elif params['optimizer'] == "rmsprop":
                 self.optimizer = optim.RMSprop(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
+            
+            self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=params['exponential_scheduler'])
 
         
 
