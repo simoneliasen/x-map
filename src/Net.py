@@ -14,7 +14,7 @@ print(args)
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
 class Net():
-    def __init__(self, pretrained = True, feature_extract = False, num_classes = 2, checkpoint = False): #features = tb positive/negative
+    def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 2, checkpoint = False): #features = tb positive/negative
         self.model_path = './resnet.pth'
         self.model_name = model_name
         self.data_dir = args.data_path #skal være opdelt i TB_positive og TB_negative
@@ -22,10 +22,7 @@ class Net():
         self.is_inception = False
         self.input_size = 224
         print(self.device)
-        self.model_names = ["densenet", "resnext", "squeezenet", "chexnet", "vgg", "densenet201", "inception","efficientnet"]
-        self.model_name = self.model_names[7]
         self.load_model(pretrained, num_classes)
-        self.load_checkpoint(checkpoint, "model")
         
         self.model.eval()
         self.model.to(self.device)
