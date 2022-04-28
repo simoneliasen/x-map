@@ -4,6 +4,8 @@ from torch import optim
 from torchvision import models
 from Methods.Train import KfoldTrain
 
+
+
 class ResNet():
     def __init__(self):
         self.model_path = './resnet.pth'
@@ -30,7 +32,7 @@ class ResNet():
         #og vælger bare loss function og optimizer
         self.criterion = nn.NLLLoss()
         #husk at skriv at vi ikke kun vil tærne på model.fc laget.
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.003)
+        self.optimizer = optim.RAdam(self.model.parameters(), lr=0.001,betas=(0.9,0.999),eps=1e-08,weight_decay=0)
         #scheduler her bliver kun brugt i den gamle train.
         #self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, factor = 0.1, patience=5)
         self.model.to(self.device) #load cuda hvis muligt

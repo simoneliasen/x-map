@@ -2,6 +2,9 @@ import torch
 from torch import nn, relu
 from torch import optim
 from torchvision import models
+import glob 
+import os
+import copy
 from Methods.wandb import wandb_initialize
 from Methods.parser import get_arguments
 
@@ -11,7 +14,7 @@ print(args)
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
 class Net():
-    def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 2): #features = tb positive/negative
+    def __init__(self, pretrained = True, feature_extract = False, num_classes = 2, checkpoint = False): #features = tb positive/negative
         self.model_path = './resnet.pth'
         self.model_name = model_name
         self.data_dir = args.data_path #skal være opdelt i TB_positive og TB_negative
@@ -19,9 +22,11 @@ class Net():
         self.is_inception = False
         self.input_size = 224
         print(self.device)
+        self.model_names = ["densenet", "resnext", "squeezenet", "chexnet", "vgg", "densenet201", "inception","efficientnet"]
+        self.model_name = self.model_names[7]
+        self.load_model(pretrained, num_classes)
+        self.load_checkpoint(checkpoint, "model")
         
-        self.load_model(model_name, pretrained, num_classes)
-
         self.model.eval()
         self.model.to(self.device)
 
@@ -44,6 +49,7 @@ class Net():
             
             self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
             self.scheduler = None
+
         else:
             self.batch_size = params['batch_size']
             self.set_dropout(params['dropout_rate'])
@@ -91,9 +97,10 @@ class Net():
             self.model.AuxLogits.fc = nn.Linear(768, num_classes)
             self.model.fc = nn.Linear(2048, num_classes)
             self.input_size = 299
-            
+
         elif model_name == "efficientnet":
             self.model = models.efficientnet_b0(pretrained=pretrained)
+            #infeatures b4=1792, b5=2048, b6=2304
             self.model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes, bias=True)
 
             
@@ -105,8 +112,6 @@ if args.model == None:
     net = Net("densenet") #skriv navnet på den du vil bruge.
 else:
     net = Net(args.model)
-
-
 
 #husk grayscale ting!!
 #og husk det med at se på hvor sikker man er i sin prediction.
