@@ -54,7 +54,7 @@ def KfoldTrain(net):
         split = int(np.floor(len(dataset) * 0.8))
         np.random.shuffle(indices)
         test_idx, kfold_idx = indices[split:], indices[:split]
-        print(len(kfold_idx),len(test_idx))
+        
         test_sampler = SubsetRandomSampler(test_idx)
         test_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_sampler)
         KFoldDataset = torch.utils.data.Subset(dataset, kfold_idx)        
@@ -129,7 +129,6 @@ def KfoldTrain(net):
                 #history['train_loss'].append(train_loss)            
                 #history['train_acc'].append(train_acc)
                 
-                print(len(train_loader.sampler))
                 total_steps += len(train_loader.sampler)
 
                 #Her ændres hvor tit man vil tage checkpoint, 1 = hver gang
@@ -235,7 +234,6 @@ def KfoldTrain(net):
                             print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
                                 
                     else:
-                        print('trigger times: 0')
                         save_checkpoint(net, fold)
                         trigger_times = 0
                     last_loss = val_loss
@@ -263,7 +261,6 @@ def KfoldTrain(net):
 
 
 def save_checkpoint(net, fold):
-        print("CHECKPOINT")
         fold_string = str(fold)
         model_name_string = str(net.model_name)
         model_file_string = f"./checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{model_name_string}.pth"
