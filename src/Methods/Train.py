@@ -12,6 +12,9 @@ from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 import random
 import copy
+import os
+import glob 
+
 
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net, checkpoint_every):
@@ -90,14 +93,15 @@ def KfoldTrain(net, checkpoint_every):
 
             # Early stopping
             last_loss = 100
-            patience = 0
+            patience = 3
             trigger_times = 0
             epoch = 0
             
             while epoch < 500:
-                epoch += 1 
-                             
-                train_loss, train_correct, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
+
+                epoch += 1
+                    
+                train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
                 train_loss = train_loss / len(train_loader.sampler)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
 
@@ -121,9 +125,9 @@ def KfoldTrain(net, checkpoint_every):
 
                 #Her ændres hvor tit man vil tage checkpoint, 1 = hver gang
                 if epoch % checkpoint_every == 0:
-                    save_checkpoint(net.model_name, net, epoch, fold)
+                    
 
-                    val_loss, val_correct, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
+                    val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
                     val_loss = val_loss / len(val_loader.sampler)
                     val_acc = (np.sum(np.diag(CMVAL)/np.sum(CMVAL))*100)
                     tn1=CMVAL[0][0]
@@ -184,8 +188,11 @@ def KfoldTrain(net, checkpoint_every):
                             # avg_test_loss = 0
                             # avg_test_acc = 0
 
-                            
-                            test_loss, test_correct, CMTEST= test_method(net.model,device,test_loader,net.criterion, net.is_inception)
+                            checkpoint_file_model = load_checkpoint(net, string = "model")
+                            checkpoint_file_optimizer = load_checkpoint(net, string = "optimizer")
+                            net.model.load_state_dict(torch.load(checkpoint_file_model))
+                            net.optimizer.load_state_dict(torch.load(checkpoint_file_optimizer))
+                            test_loss, CMTEST= test_method(net.model,device,test_loader,net.criterion, net.is_inception)
                             test_loss = test_loss / len(test_loader.sampler)
                             test_correct = (np.sum(np.diag(CMTEST)/np.sum(CMTEST))*100)
                             tn2=CMTEST[0][0]
@@ -216,6 +223,7 @@ def KfoldTrain(net, checkpoint_every):
                                 
                     else:
                         print('trigger times: 0')
+                        save_checkpoint(net, fold)
                         trigger_times = 0
                     last_loss = val_loss
                 else:
@@ -241,22 +249,19 @@ def KfoldTrain(net, checkpoint_every):
 
 
 
-def save_checkpoint(model_name, net, epoch, fold):
+def save_checkpoint(net, fold):
         print("CHECKPOINT")
-        now = datetime.now()
-        epoch_string = str(epoch)
         fold_string = str(fold)
-        model_name_string = str(model_name)
-        time_string = str(now.strftime("%d.%m.%Y.%H.%M.%S"))
-        model_file_string = f"./checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{epoch_string}-{model_name_string}-{time_string}.pth"
-        optimizer_file_string = f"./checkpoints/{model_name_string}/optimizer/optimizercheckpoint-{fold_string}-{epoch_string}-{model_name_string}-{time_string}.pth"
+        model_name_string = str(net.model_name)
+        model_file_string = f"./checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{model_name_string}.pth"
+        optimizer_file_string = f"./checkpoints/{model_name_string}/optimizer/optimizercheckpoint-{fold_string}-{model_name_string}.pth"
         model_FILE = model_file_string
         optimizer_FILE = optimizer_file_string
         torch.save(net.model.state_dict(), model_FILE)
         torch.save(net.optimizer.state_dict(), optimizer_FILE)
 
 def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
-        train_loss,train_correct=0.0,0
+        train_loss=0.0
         CMTRAIN = 0
         model.train()
         for images, labels in dataloader:
@@ -278,13 +283,12 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
             optimizer.step()
             train_loss += loss.item() * images.size(0)
             scores, predictions = torch.max(output.data, 1)
-            train_correct += (predictions == labels).sum().item()
             CMTRAIN+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1])           
 
-        return train_loss,train_correct,CMTRAIN
+        return train_loss,CMTRAIN
   
 def valid_epoch(model,device,dataloader,loss_fn, is_inception):
-    valid_loss, val_correct = 0.0, 0
+    valid_loss=0.0
     CMVAL = 0
     model.eval()
     for images, labels in dataloader:
@@ -297,14 +301,13 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
 
         valid_loss+=loss.item()*images.size(0)
         scores, predictions = torch.max(output.data,1)
-        val_correct+=(predictions == labels).sum().item()
         CMVAL+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
-    return valid_loss,val_correct, CMVAL
+    return valid_loss,CMVAL
 
 
 def test_method(model,device,dataloader,loss_fn, is_inception):
-    test_loss, test_correct = 0.0, 0
+    test_loss=0.0
     CMTEST = 0
     model.eval()
     for images, labels in dataloader:
@@ -317,9 +320,29 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
 
         test_loss+=loss.item()*images.size(0)
         scores, predictions = torch.max(output.data,1)
-        test_correct+=(predictions == labels).sum().item()
         CMTEST+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
-    return test_loss,test_correct, CMTEST
+    return test_loss,CMTEST
+
+def load_checkpoint(net, string):
+    #load model
+    if string == "model":
+        path_string = f"./checkpoints/{net.model_name}/model/*.pth"
+        list_of_files = glob.glob(f'{path_string}') # * means all if need specific format then *.csv
+        latest_file = max(list_of_files, key=os.path.getctime)
+        print("You have loaded the modelcheckpoint: " + latest_file)
+        FILE = f"{latest_file}"
+        #checkpoint = self.model.load_state_dict(torch.load(FILE)) # it takes the loaded dictionary, not the path file itself
+        #load optimizer
+       
+    if string == "optimizer":
+        path_string = f"./checkpoints/{net.model_name}/optimizer/*.pth"
+        list_of_files = glob.glob(f'{path_string}') # * means all if need specific format then *.csv
+        latest_file = max(list_of_files, key=os.path.getctime)
+        print("You have loaded the optimizercheckpoint: " + latest_file)
+        FILE = f"{latest_file}"
+        #checkpoint = self.model.load_state_dict(torch.load(FILE)) # it takes the loaded dictionary, not the path file itself
+   
+    return FILE
 
 
