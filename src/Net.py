@@ -53,7 +53,8 @@ class Net():
             elif params['optimizer'] == "rmsprop":
                 self.optimizer = optim.RMSprop(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
             
-            self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=params['exponential_scheduler'])
+            if args.scheduler:
+                self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=params['exponential_scheduler'])
 
         
 
