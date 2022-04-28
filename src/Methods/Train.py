@@ -14,44 +14,31 @@ import random
 import copy
 
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
-def KfoldTrain(net, model_name, checkpoint_every):
+def KfoldTrain(net, checkpoint_every):
         transform_ting = transforms.Compose([
             transforms.Resize(net.input_size + 32), #fordi 224 + 32 = 256.
             transforms.CenterCrop(net.input_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
-
-
+        print(net.model_name)
+        #Bruges til at lave en kopi af parameterne før model er kørt
+        #De bruges til næste fold, så modellen bliver reset.
         parameterDefault = copy.deepcopy(net.model.state_dict())
         optimizerDefault = copy.deepcopy(net.optimizer.state_dict())            
-        data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
         
-
-        dataset = datasets.ImageFolder(data_dir,       
-                        transform=transform_ting)
-
+        data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
         #imagefolder konverterer vidst selv til RGB.
-
+        dataset = datasets.ImageFolder(data_dir,       
+                        transform=transform_ting)      
+        
         torch.manual_seed(42)
         np.random.seed(42)
         
-
-
         batch_size=4 #fra 128
         k = 5 # dvs. hver fold er 1/10.
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
-
-        
-        #train_idx = ca. 90 % af træningssættet. Eks: [1,3,4,5......]
-        #val_idx = ca. 10 % af træningssættet. Eks: [2, 13......]
-        #og de storer bare indexer. 
-        #og for hver fold skifter værdierne for train_idx og val_idx.
-
-        #variable to get the correct number of steps or image processed in tensorboard
-
-
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -59,51 +46,49 @@ def KfoldTrain(net, model_name, checkpoint_every):
         np.random.shuffle(indices)
         test_idx, kfold_idx = indices[split:], indices[:split]
         print(len(kfold_idx),len(test_idx))
-        KFold_sampler = SubsetRandomSampler(kfold_idx)
         test_sampler = SubsetRandomSampler(test_idx)
-        #KFold_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=KFold_sampler)
         test_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_sampler)
-
-
+        KFoldDataset = torch.utils.data.Subset(dataset, kfold_idx)        
+        
         #To get final test result for all folds
         Total_Test_Avg_Loss = 0
         Total_Test_Avg_Acc = 0
+        Total_Test_Avg_Sensitivity = 0
+        Total_Test_Avg_precision = 0
+        Total_Test_Avg_specificity = 0
+        Total_Test_Avg_FalseNegativeRate = 0
+        Total_Test_Avg_FalsePositiveRate = 0
 
-       #print(len(KFold_loader),len(test_loader))
+        #train_idx = ca. 90 % af træningssættet. Eks: [1,3,4,5......]
+        #val_idx = ca. 10 % af træningssættet. Eks: [2, 13......]
+        #og de storer bare indexer. 
+        #og for hver fold skifter værdierne for train_idx og val_idx.
 
-       
-
-        for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFold_sampler)))):
+        for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFoldDataset)))):
+            #Load parameter and optimizer fra inden modellen er kørt
             net.model.load_state_dict(parameterDefault)
             net.optimizer.load_state_dict(optimizerDefault)
-            #net.optimizer.state_dict = net3
-            # if 1 == 1:
-            # #if fold > 2:
-            #     for name, param in net2.model.named_parameters():
-            #         if param.requires_grad:
-            #             print(name, param.data)
 
             print('Fold {}'.format(fold + 1))
 
             #Creates eventlog files for tensorboard, saved in runs map, names the file as the modelname/datetime
-            model_name_string = str(model_name)
+            model_name_string = str(net.model_name)
             now = datetime.now()
             time_string = str(now.strftime("%d.%m.%Y.%H.%M.%S"))
             writter = SummaryWriter("runs/{}_{}_{}".format(fold + 1,model_name_string,time_string))
+            #variable to get the correct number of steps or image processed in tensorboard
             total_steps = 0
 
             train_sampler = SubsetRandomSampler(train_idx)
             val_sampler = SubsetRandomSampler(val_idx)
-            train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_sampler)
-            val_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=val_sampler)
-
-      
-            
+            train_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=train_sampler)
+            val_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=val_sampler)
+          
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
             history = {'train_loss': [], 'val_loss': [],'train_acc':[],'val_acc':[]}
 
-             # Early stopping
+            # Early stopping
             last_loss = 100
             patience = 0
             trigger_times = 0
@@ -136,7 +121,7 @@ def KfoldTrain(net, model_name, checkpoint_every):
 
                 #Her ændres hvor tit man vil tage checkpoint, 1 = hver gang
                 if epoch % checkpoint_every == 0:
-                    save_checkpoint(model_name, net, epoch, fold)
+                    save_checkpoint(net.model_name, net, epoch, fold)
 
                     val_loss, val_correct, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
                     val_loss = val_loss / len(val_loader.sampler)
@@ -178,10 +163,9 @@ def KfoldTrain(net, model_name, checkpoint_every):
                     history['train_loss'].append(train_loss)
                     history['val_loss'].append(val_loss)
                     history['train_acc'].append(train_acc)
-                    history['val_acc'].append(val_acc)
+                    history['val_acc'].append(val_acc)               
 
                     #print('The Current Loss:', val_loss)
-
                     early_stopping_val_loss = val_loss
                     early_stopping_val_loss = format(early_stopping_val_loss, '.4f')
                     early_stopping_last_loss = last_loss
@@ -213,14 +197,7 @@ def KfoldTrain(net, model_name, checkpoint_every):
                             test_specificity= (tn2/(tn2+fp2))*100
                             test_FalseNegativeRate= (1-(tp2/(tp2+fn2)))*100
                             test_FalsePositiveRate = (1-(tn2/(tn2+fp2)))*100
-
-
-                            #print("Test:{} Test Loss:{:.8f}, Test Acc:{:.8f} %".format(x, test_loss,test_correct))
-                            # avg_test_loss += test_loss
-                            # avg_test_acc += test_correct
-                                
-                            # avg_test_loss = avg_test_loss / 10
-                            # avg_test_acc = avg_test_acc / 10
+                    
                             Total_Test_Avg_Loss += test_loss
                             Total_Test_Avg_Acc += test_correct
                             Total_Test_Avg_Sensitivity += test_sensitivity
@@ -235,7 +212,7 @@ def KfoldTrain(net, model_name, checkpoint_every):
                             writter.add_scalar('TestSpecificity', test_specificity, fold)
                             writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
                             writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
-                            print("Test Loss:{:.8f}, Avg Test Acc:{:.8f} %, Avg Test Sensitivity:{:.8f} %, Avg Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
+                            print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
                                 
                     else:
                         print('trigger times: 0')
