@@ -47,9 +47,5 @@ def wandb_log(train_loss, test_loss, train_acc, test_acc):
 def sweep():
     wandb.init(config=sweep_config)
     _net.set_hyperparameters(wandb.config)
-    #test at de er sat rigtigt:
-    print(_net.model)
-    print(_net.optimizer)
-    print(_net.batch_size)
     from Methods.Train import KfoldTrain
     KfoldTrain(_net)

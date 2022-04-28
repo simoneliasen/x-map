@@ -82,7 +82,6 @@ class Net():
 
         elif model_name == "vgg":
             self.model = models.vgg11_bn(pretrained=pretrained)
-            print(self.model.classifier)
             self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
 
         elif model_name == "inception":
