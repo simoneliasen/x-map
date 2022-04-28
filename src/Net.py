@@ -22,7 +22,7 @@ class Net():
         self.is_inception = False
         self.input_size = 224
         print(self.device)
-        self.load_model(pretrained, num_classes)
+        self.load_model(model_name, pretrained, num_classes)
         
         self.model.eval()
         self.model.to(self.device)
