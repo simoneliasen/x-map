@@ -20,7 +20,7 @@ from Methods.parser import get_arguments
 
 args = get_arguments()
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
-def KfoldTrain(net, checkpoint_every):
+def KfoldTrain(net):
         transform_ting = transforms.Compose([
             transforms.Resize(net.input_size + 32), #fordi 224 + 32 = 256.
             transforms.CenterCrop(net.input_size),
@@ -133,7 +133,7 @@ def KfoldTrain(net, checkpoint_every):
                 total_steps += len(train_loader.sampler)
 
                 #Her ændres hvor tit man vil tage checkpoint, 1 = hver gang
-                if epoch % checkpoint_every == 0:
+                if epoch % 3 == 0:
                     
 
                     val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
