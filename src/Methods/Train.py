@@ -15,7 +15,10 @@ import copy
 import os
 import glob 
 
+from Methods.wandb import wandb_log
+from Methods.parser import get_arguments
 
+args = get_arguments()
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net, checkpoint_every):
         transform_ting = transforms.Compose([
@@ -24,22 +27,25 @@ def KfoldTrain(net, checkpoint_every):
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
+
         print(net.model_name)
         #Bruges til at lave en kopi af parameterne før model er kørt
         #De bruges til næste fold, så modellen bliver reset.
         parameterDefault = copy.deepcopy(net.model.state_dict())
         optimizerDefault = copy.deepcopy(net.optimizer.state_dict())            
         
-        data_dir = "../PP_data/" # husk opdelt i TP_positive, TP_positive
+        data_dir = net.data_dir # husk opdelt i TP_positive, TP_positive
+
         #imagefolder konverterer vidst selv til RGB.
         dataset = datasets.ImageFolder(data_dir,       
                         transform=transform_ting)      
         
         torch.manual_seed(42)
-        np.random.seed(42)
-        
-        batch_size=4 #fra 128
+
+        num_epochs=2 # fra 10
+        batch_size=net.batch_size #fra 128
         k = 5 # dvs. hver fold er 1/10.
+        
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
 
@@ -104,6 +110,9 @@ def KfoldTrain(net, checkpoint_every):
                 train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
                 train_loss = train_loss / len(train_loader.sampler)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
+          
+                if net.scheduler is not None:
+                    net.scheduler.step()
 
                 tn=CMTRAIN[0][0]
                 tp=CMTRAIN[1][1]
@@ -130,6 +139,10 @@ def KfoldTrain(net, checkpoint_every):
                     val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
                     val_loss = val_loss / len(val_loader.sampler)
                     val_acc = (np.sum(np.diag(CMVAL)/np.sum(CMVAL))*100)
+                    
+                    if args.wandb:
+                      wandb_log(train_loss, val_loss, train_acc, val_acc)
+                    
                     tn1=CMVAL[0][0]
                     tp1=CMVAL[1][1]
                     fp1=CMVAL[0][1]
@@ -259,6 +272,8 @@ def save_checkpoint(net, fold):
         optimizer_FILE = optimizer_file_string
         torch.save(net.model.state_dict(), model_FILE)
         torch.save(net.optimizer.state_dict(), optimizer_FILE)
+
+        
 
 def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
         train_loss=0.0

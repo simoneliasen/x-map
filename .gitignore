@@ -1,2 +1,7 @@
-
+wandb/*
+src/Methods/__pycache__/*
+src\Methods\__pycache__\*
 data/cifar-10-python.tar.gz
+src/Methods/__pycache__/Train.cpython-39.pyc
+*.pyc
+*.pyc
