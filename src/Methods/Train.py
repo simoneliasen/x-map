@@ -50,7 +50,7 @@ def KfoldTrain(net):
                 train_loss, train_correct=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
                 test_loss, test_correct=valid_epoch(net.model,device,test_loader,net.criterion, net.is_inception)
 
-                if args.scheduler:
+                if net.scheduler is not None:
                     net.scheduler.step()
 
                 train_loss = train_loss / len(train_loader.sampler)
