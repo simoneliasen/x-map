@@ -190,10 +190,13 @@ def KfoldTrain(net):
                     #print('The Current Loss:', val_loss)
                     early_stopping_val_loss = val_loss
                     early_stopping_val_loss = format(early_stopping_val_loss, '.4f')
+
                     early_stopping_last_loss = last_loss
                     early_stopping_last_loss = format(early_stopping_last_loss, '.4f')
-                    
-                    if early_stopping_val_loss > early_stopping_last_loss:
+
+                    if early_stopping_best_val_loss > early_stopping_last_loss:
+                        early_stopping_best_val_loss = val_loss
+                        early_stopping_best_val_loss = format(early_stopping_best_val_loss, '.4f')
 
                         trigger_times += 1
                         print('Trigger Times:', trigger_times)
