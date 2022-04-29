@@ -1,7 +1,7 @@
 import wandb
 
 sweep_config = {
-    'name': 'dense1',
+    'name': 'dense2',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
     'name': 'test_acc',

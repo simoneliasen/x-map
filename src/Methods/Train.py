@@ -99,7 +99,7 @@ def KfoldTrain(net):
 
             # Early stopping
             best_val_loss = 99999999.9
-            patience = 3
+            patience = 10
             trigger_times = 0
             epoch = 0
             
