@@ -119,7 +119,6 @@ def KfoldTrain(net):
                 fp=CMTRAIN[0][1]
                 fn=CMTRAIN[1][0]
 
-                print(tn, tp, fp, fn)
                 train_sensitivity= (tp/(tp+fn))*100
                 train_precision= (tp/(tp+fp))*100
                 train_specificity= (tn/(tn+fp))*100
