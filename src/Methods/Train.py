@@ -15,7 +15,7 @@ import copy
 import os
 import glob 
 
-from Methods.wandb import wandb_log
+from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
 
 args = get_arguments()
@@ -59,6 +59,9 @@ def KfoldTrain(net):
         test_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_sampler)
         KFoldDataset = torch.utils.data.Subset(dataset, kfold_idx)        
         
+        cumu_val_acc = 0.0
+        cumu_test_acc = 0.0
+
         #To get final test result for all folds
         Total_Test_Avg_Loss = 0
         Total_Test_Avg_Acc = 0
@@ -99,7 +102,8 @@ def KfoldTrain(net):
 
             # Early stopping
             best_val_loss = 99999999.9
-            patience = 10
+            best_val_loss_acc = 0.0
+            patience = 1 #bare test. fra 10.
             trigger_times = 0
             epoch = 0
             
@@ -234,11 +238,18 @@ def KfoldTrain(net):
                             writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
                             writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
                             print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
+                            cumu_val_acc += best_val_loss_acc
+                            print('cumu val acc: ' ,cumu_val_acc)
                                 
                     else: #ergo: den nye val er bedre
                         save_checkpoint(net, fold)
                         trigger_times = 0
                         best_val_loss = val_loss_rounded
+                        best_val_loss_acc = val_acc
+
+        avg_val_acc = cumu_val_acc / float(k)
+        print('avg_val_acc er: ', avg_val_acc)
+        wandb_log_folds_avg(avg_val_acc)
 
         Total_Test_Avg_Loss = Total_Test_Avg_Loss / k
         Total_Test_Avg_Acc = Total_Test_Avg_Acc / k

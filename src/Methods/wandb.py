@@ -4,7 +4,7 @@ sweep_config = {
     'name': 'densenet',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
-    'name': 'test_acc',
+    'name': 'avg_val_acc',
     'goal': 'maximize'   
         },
     'parameters': {
@@ -48,6 +48,9 @@ def wandb_log(train_loss, val_loss, train_acc, val_acc):
     wandb.log({"val_loss": val_loss})
     wandb.log({"train_acc": train_acc})
     wandb.log({"val_acc": val_acc})
+
+def wandb_log_folds_avg(avg_val_acc):
+    wandb.log({"avg_val_acc":avg_val_acc})
 
 def sweep():
     wandb.init(config=sweep_config)
