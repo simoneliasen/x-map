@@ -1,6 +1,7 @@
 import wandb
 
 sweep_config = {
+    'name': 'dense1',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
     'name': 'test_acc',
@@ -14,16 +15,20 @@ sweep_config = {
             'values': ['sgd', 'rmsprop']
         },
         'exponential_scheduler': { 
-            'values': [0.01, 0.025, 0.05] 
+            'min': 0.01,
+            'max': 0.05, 
         },
         'lr': { 
-            'values': [0.1, 0.01, 0.001]
+            'min': 0.001,
+            'max': 0.1,
         },
         'weight_decay': { 
-            'values': [0.0001, 0.000005]
+            'min': 0.000005,
+            'max': 0.0001,
         },
         'dropout_rate': { 
-            'values': [0, 0.2, 0.5]
+            'min': 0,
+            'max': 0.5,
         },
     }
 }
