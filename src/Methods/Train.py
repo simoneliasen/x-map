@@ -101,7 +101,7 @@ def KfoldTrain(net):
             history = {'train_loss': [], 'val_loss': [],'train_acc':[],'val_acc':[]}
 
             # Early stopping
-            best_val_loss = 99999999.9
+            best_val_loss = 9999999999999999999.9
             best_val_loss_acc = 0.0
             patience = 1 #bare test. fra 10.
             trigger_times = 0
