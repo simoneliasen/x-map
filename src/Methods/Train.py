@@ -98,7 +98,7 @@ def KfoldTrain(net):
             history = {'train_loss': [], 'val_loss': [],'train_acc':[],'val_acc':[]}
 
             # Early stopping
-            last_loss = 100
+            best_val_loss = 99999999.9
             patience = 3
             trigger_times = 0
             epoch = 0
@@ -188,15 +188,9 @@ def KfoldTrain(net):
                     history['val_acc'].append(val_acc)               
 
                     #print('The Current Loss:', val_loss)
-                    early_stopping_val_loss = val_loss
-                    early_stopping_val_loss = format(early_stopping_val_loss, '.4f')
+                    val_loss_rounded = float(format(val_loss, '.4f'))
 
-                    early_stopping_last_loss = last_loss
-                    early_stopping_last_loss = format(early_stopping_last_loss, '.4f')
-
-                    if early_stopping_best_val_loss > early_stopping_last_loss:
-                        early_stopping_best_val_loss = val_loss
-                        early_stopping_best_val_loss = format(early_stopping_best_val_loss, '.4f')
+                    if val_loss_rounded > best_val_loss: #ergo: den nye val er dårligere
 
                         trigger_times += 1
                         print('Trigger Times:', trigger_times)
@@ -242,10 +236,11 @@ def KfoldTrain(net):
                             writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
                             print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
                                 
-                    else:
+                    else: #ergo: den nye val er bedre
                         save_checkpoint(net, fold)
                         trigger_times = 0
-                    last_loss = val_loss
+                        best_val_loss = val_loss_rounded
+
                 else:
                     print("Epoch:{} AVG Training Loss:{:.8f} AVG Training Acc {:.8f} %".format(epoch,
                                                                                             train_loss,                                                                                       
