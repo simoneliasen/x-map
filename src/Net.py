@@ -44,11 +44,17 @@ class Net():
             else:
                 self.batch_size = args.batch_size
             
+            if self.model_name == "densenet" and self.batch_size > 65:
+                self.batch_size = 64
+
             self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
             self.scheduler = None
 
         else:
             self.batch_size = params['batch_size']
+            if self.model_name == "densenet" and self.batch_size > 65:
+                self.batch_size = 64
+            
             self.set_dropout(params['dropout_rate'])
 
             if params['optimizer'] == "sgd":
