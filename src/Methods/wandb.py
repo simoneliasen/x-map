@@ -27,7 +27,7 @@ sweep_config = {
             'max': 0.0001,
         },
         'dropout_rate': { 
-            'min': 0,
+            'min': 0.0,
             'max': 0.5,
         },
     }
