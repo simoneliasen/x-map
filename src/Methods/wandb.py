@@ -43,11 +43,11 @@ def wandb_initialize(net):
     #kan også bruge et specifikt sweep_id, fx f7pvbfd4 (find på wandb under sweeps)
     #wandb.watch(model)
 
-def wandb_log(train_loss, test_loss, train_acc, test_acc):
+def wandb_log(train_loss, val_loss, train_acc, val_acc):
     wandb.log({"train_loss": train_loss})
-    wandb.log({"test_loss": test_loss})
+    wandb.log({"val_loss": val_loss})
     wandb.log({"train_acc": train_acc})
-    wandb.log({"test_acc": test_acc})
+    wandb.log({"val_acc": val_acc})
 
 def sweep():
     wandb.init(config=sweep_config)
