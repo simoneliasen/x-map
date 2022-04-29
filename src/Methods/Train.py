@@ -121,7 +121,6 @@ def KfoldTrain(net):
 
                 only_negative_guesses = True if tp + fp == 0 else False
 
-                print(tn, tp, fp, fn)
                 train_sensitivity= (tp/(tp+fn))*100
                 train_precision= 0 if only_negative_guesses else (tp/(tp+fp))*100
                 train_specificity= (tn/(tn+fp))*100
@@ -240,11 +239,6 @@ def KfoldTrain(net):
                         save_checkpoint(net, fold)
                         trigger_times = 0
                         best_val_loss = val_loss_rounded
-
-                else:
-                    print("Epoch:{} AVG Training Loss:{:.8f} AVG Training Acc {:.8f} %".format(epoch,
-                                                                                            train_loss,                                                                                       
-                                                                                            train_acc))
 
         Total_Test_Avg_Loss = Total_Test_Avg_Loss / k
         Total_Test_Avg_Acc = Total_Test_Avg_Acc / k
