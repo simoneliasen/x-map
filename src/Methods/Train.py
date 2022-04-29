@@ -119,9 +119,11 @@ def KfoldTrain(net):
                 fp=CMTRAIN[0][1]
                 fn=CMTRAIN[1][0]
 
+                only_negative_guesses = True if tp + fp == 0 else False
+
                 print(tn, tp, fp, fn)
                 train_sensitivity= (tp/(tp+fn))*100
-                train_precision= (tp/(tp+fp))*100
+                train_precision= 0 if only_negative_guesses else (tp/(tp+fp))*100
                 train_specificity= (tn/(tn+fp))*100
                 train_FalseNegativeRate= (1-(tp/(tp+fn)))*100
                 train_FalsePositiveRate = (1-(tn/(tn+fp)))*100
