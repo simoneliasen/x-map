@@ -62,7 +62,7 @@ def KfoldTrain(net):
         cumu_val_acc = 0.0
         cumu_test_acc = 0.0
 
-        #To get final test result for all folds
+        #region To get final test result for all folds
         Total_Test_Avg_Loss = 0
         Total_Test_Avg_Acc = 0
         Total_Test_Avg_Sensitivity = 0
@@ -70,11 +70,7 @@ def KfoldTrain(net):
         Total_Test_Avg_specificity = 0
         Total_Test_Avg_FalseNegativeRate = 0
         Total_Test_Avg_FalsePositiveRate = 0
-
-        #train_idx = ca. 90 % af træningssættet. Eks: [1,3,4,5......]
-        #val_idx = ca. 10 % af træningssættet. Eks: [2, 13......]
-        #og de storer bare indexer. 
-        #og for hver fold skifter værdierne for train_idx og val_idx.
+        #endregion
 
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFoldDataset)))):
             #Load parameter and optimizer fra inden modellen er kørt
@@ -118,6 +114,7 @@ def KfoldTrain(net):
                 if net.scheduler is not None:
                     net.scheduler.step()
 
+                #region cmting
                 tn=CMTRAIN[0][0]
                 tp=CMTRAIN[1][1]
                 fp=CMTRAIN[0][1]
@@ -134,6 +131,7 @@ def KfoldTrain(net):
 
                 #history['train_loss'].append(train_loss)            
                 #history['train_acc'].append(train_acc)
+                #endregion
                 
                 total_steps += len(train_loader.sampler)
 
@@ -148,6 +146,7 @@ def KfoldTrain(net):
                     if args.wandb:
                       wandb_log(train_loss, val_loss, train_acc, val_acc)
                     
+                    #region Description
                     tn1=CMVAL[0][0]
                     tp1=CMVAL[1][1]
                     fp1=CMVAL[0][1]
@@ -188,7 +187,8 @@ def KfoldTrain(net):
                     history['train_loss'].append(train_loss)
                     history['val_loss'].append(val_loss)
                     history['train_acc'].append(train_acc)
-                    history['val_acc'].append(val_acc)               
+                    history['val_acc'].append(val_acc) 
+                    #endregion              
 
                     #print('The Current Loss:', val_loss)
                     val_loss_rounded = float(format(val_loss, '.4f'))
@@ -213,6 +213,8 @@ def KfoldTrain(net):
                             test_loss, CMTEST= test_method(net.model,device,test_loader,net.criterion, net.is_inception)
                             test_loss = test_loss / len(test_loader.sampler)
                             test_correct = (np.sum(np.diag(CMTEST)/np.sum(CMTEST))*100)
+
+                            #region cmtest
                             tn2=CMTEST[0][0]
                             tp2=CMTEST[1][1]
                             fp2=CMTEST[0][1]
@@ -237,6 +239,7 @@ def KfoldTrain(net):
                             writter.add_scalar('TestSpecificity', test_specificity, fold)
                             writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
                             writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
+                            #endregion
                             print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
                             cumu_val_acc += best_val_loss_acc
                             print('cumu val acc: ' ,cumu_val_acc)
@@ -251,6 +254,7 @@ def KfoldTrain(net):
         print('avg_val_acc er: ', avg_val_acc)
         wandb_log_folds_avg(avg_val_acc)
 
+        #region log ting
         Total_Test_Avg_Loss = Total_Test_Avg_Loss / k
         Total_Test_Avg_Acc = Total_Test_Avg_Acc / k
         Total_Test_Avg_Sensitivity = Total_Test_Avg_Sensitivity / k
@@ -266,6 +270,7 @@ def KfoldTrain(net):
         writter.add_scalar('TotalAVGTestSpecificity', Total_Test_Avg_specificity, fold)
         writter.add_scalar('TotalAVGTestFalseNegativeRate', Total_Test_Avg_FalseNegativeRate, fold)
         writter.add_scalar('TotalAVGTestFalsePositiveRate', Total_Test_Avg_FalsePositiveRate, fold)
+        #endregion
 
 
 
