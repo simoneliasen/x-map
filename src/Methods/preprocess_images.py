@@ -142,17 +142,19 @@ def downscale(size):
             new_height = 0.0
 
             if width > height:
-                new_width = size * aspect_ratio
-                new_height = size
-            else:
-                new_height = size * aspect_ratio
                 new_width = size
+                new_height = size / aspect_ratio
+            else:
+                new_height = size
+                new_width = size * aspect_ratio
             
             new_size = (int(new_width), int(new_height))
             new = im.resize(new_size)
+            padded = add_padding(size, new)
             new_path = f"{newnegpath}/{img}"
-            new.save(new_path)
-        except:
+            padded.save(new_path)
+        except Exception as e:
+            print(e)
             continue
 
 #gjorde ingenting:
