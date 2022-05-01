@@ -338,17 +338,19 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
     test_loss=0.0
     CMTEST = 0
     model.eval()
-    for images, labels in dataloader:
 
-        images,labels = images.to(device),labels.to(device)
-        #lav
+    with torch.no_grad(): #undgå cuda out of memoery fejl?
+        for images, labels in dataloader:
 
-        output = model(images)
-        loss = loss_fn(output,labels)
+            images,labels = images.to(device),labels.to(device)
+            #lav
 
-        test_loss+=loss.item()*images.size(0)
-        scores, predictions = torch.max(output.data,1)
-        CMTEST+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
+            output = model(images)
+            loss = loss_fn(output,labels)
+
+            test_loss+=loss.item()*images.size(0)
+            scores, predictions = torch.max(output.data,1)
+            CMTEST+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
     return test_loss,CMTEST
 

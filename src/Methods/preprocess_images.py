@@ -98,6 +98,7 @@ def add_padding(size, img):
 
 def downscale(size):
     pospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Positive"
+    #pospath = r"C:\Users\PC\Desktop\hejmor"
     pos = [f for f in listdir(pospath) if isfile(join(pospath, f))]
 
     negpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Negative"
@@ -120,7 +121,7 @@ def downscale(size):
                 new_height = size / aspect_ratio
             else:
                 new_height = size
-                new_width = size / aspect_ratio
+                new_width = size * aspect_ratio
             
             new_size = (int(new_width), int(new_height))
             new = im.resize(new_size)
@@ -131,7 +132,7 @@ def downscale(size):
             print(e)
             continue
 
-    for img in neg:
+    #for img in neg:
         try:
             path = f"{negpath}/{img}"
             im = Image.open(path)
