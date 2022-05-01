@@ -23,7 +23,7 @@ args = get_arguments()
 def KfoldTrain(net):
         transform_ting = transforms.Compose([
             #transforms.Resize(net.input_size + 32), #fordi 224 + 32 = 256. #kommenteret ud pga. at jeg til test bruger resized imgs
-            #transforms.CenterCrop(net.input_size),
+            transforms.CenterCrop(net.input_size + 32),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
