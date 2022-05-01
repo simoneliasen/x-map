@@ -107,7 +107,7 @@ def downscale(size):
     newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized_cropped/TB_Positive"
     newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized_cropped/TB_Negative"
 
-    for img in pos:
+    """for img in pos:
         try:
             path = f"{pospath}/{img}"
             im = Image.open(path)
@@ -130,9 +130,9 @@ def downscale(size):
             padded.save(new_path)
         except Exception as e:
             print(e)
-            continue
+            continue"""
 
-    #for img in neg:
+    for img in neg:
         try:
             path = f"{negpath}/{img}"
             im = Image.open(path)
