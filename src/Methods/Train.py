@@ -89,8 +89,8 @@ def KfoldTrain(net):
 
             train_sampler = SubsetRandomSampler(train_idx)
             val_sampler = SubsetRandomSampler(val_idx)
-            train_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=train_sampler)
-            val_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=val_sampler)
+            train_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=train_sampler, pin_memory=True)
+            val_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=val_sampler, pin_memory=True)
           
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -99,7 +99,7 @@ def KfoldTrain(net):
             # Early stopping
             best_val_loss = 9999999999999999999.9
             best_val_loss_acc = 0.0
-            patience = 10 #bare test. fra 10.
+            patience = 3 #bare til hyper tuning.
             trigger_times = 0
             epoch = 0
             
