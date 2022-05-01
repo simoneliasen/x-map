@@ -92,44 +92,50 @@ def downscale(size):
     newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized/TB_Negative"
 
     for img in pos:
-        path = f"{pospath}/{img}"
-        im = Image.open(path)
-        width, height = im.size
-        aspect_ratio = width / height
-        new_width = 0.0
-        new_height = 0.0
+        try:
+            path = f"{pospath}/{img}"
+            im = Image.open(path)
+            width, height = im.size
+            aspect_ratio = width / height
+            new_width = 0.0
+            new_height = 0.0
 
-        if width > height:
-            new_width = size * aspect_ratio
-            new_height = size
-        else:
-            new_height = size * aspect_ratio
-            new_width = size
-        
-        new_size = (int(new_width), int(new_height))
-        new = im.resize(new_size)
-        new_path = f"{newpospath}/{img}"
-        new.save(new_path)
+            if width > height:
+                new_width = size * aspect_ratio
+                new_height = size
+            else:
+                new_height = size * aspect_ratio
+                new_width = size
+            
+            new_size = (int(new_width), int(new_height))
+            new = im.resize(new_size)
+            new_path = f"{newpospath}/{img}"
+            new.save(new_path)
+        except:
+            continue
 
     for img in neg:
-        path = f"{negpath}/{img}"
-        im = Image.open(path)
-        width, height = im.size
-        aspect_ratio = width / height
-        new_width = 0.0
-        new_height = 0.0
+        try:
+            path = f"{negpath}/{img}"
+            im = Image.open(path)
+            width, height = im.size
+            aspect_ratio = width / height
+            new_width = 0.0
+            new_height = 0.0
 
-        if width > height:
-            new_width = size * aspect_ratio
-            new_height = size
-        else:
-            new_height = size * aspect_ratio
-            new_width = size
-        
-        new_size = (int(new_width), int(new_height))
-        new = im.resize(new_size)
-        new_path = f"{newnegpath}/{img}"
-        new.save(new_path)
+            if width > height:
+                new_width = size * aspect_ratio
+                new_height = size
+            else:
+                new_height = size * aspect_ratio
+                new_width = size
+            
+            new_size = (int(new_width), int(new_height))
+            new = im.resize(new_size)
+            new_path = f"{newnegpath}/{img}"
+            new.save(new_path)
+        except:
+            continue
 
 #gjorde ingenting:
 def convert2jpg():
