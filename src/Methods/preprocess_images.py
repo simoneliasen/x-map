@@ -81,6 +81,21 @@ def add_mask2name():
         new_path = f"{maskpath}\\{new_name}"
         os.rename(path, new_path)
 
+def add_padding(size, img):
+    #sort baggrundsbillede
+    black_mask = Image.new('RGB', (size, size), 0)
+
+    #men hvad er  upper left corner?
+    img_height, img_width = img.size
+
+    top = (size - img_height) / 2
+    left = (size - img_width) / 2
+
+    #masked img
+    black_mask.paste(img, (int(top), int(left)))
+    #im.show()
+    return black_mask
+
 def downscale(size):
     pospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Positive"
     pos = [f for f in listdir(pospath) if isfile(join(pospath, f))]
@@ -88,8 +103,8 @@ def downscale(size):
     negpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Negative"
     neg = [f for f in listdir(negpath) if isfile(join(negpath, f))]
 
-    newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized/TB_Positive"
-    newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized/TB_Negative"
+    newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized_cropped/TB_Positive"
+    newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized_cropped/TB_Negative"
 
     for img in pos:
         try:
@@ -101,17 +116,19 @@ def downscale(size):
             new_height = 0.0
 
             if width > height:
-                new_width = size * aspect_ratio
-                new_height = size
-            else:
-                new_height = size * aspect_ratio
                 new_width = size
+                new_height = size / aspect_ratio
+            else:
+                new_height = size
+                new_width = size / aspect_ratio
             
             new_size = (int(new_width), int(new_height))
             new = im.resize(new_size)
+            padded = add_padding(size, new)
             new_path = f"{newpospath}/{img}"
-            new.save(new_path)
-        except:
+            padded.save(new_path)
+        except Exception as e:
+            print(e)
             continue
 
     for img in neg:
@@ -166,5 +183,5 @@ def convert_mask2p():
         im = im.convert('P')
         im.save(new_path)
 
-downscale(224)
+downscale(256)
 

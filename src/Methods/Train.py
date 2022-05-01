@@ -23,7 +23,7 @@ args = get_arguments()
 def KfoldTrain(net):
         transform_ting = transforms.Compose([
             #transforms.Resize(net.input_size + 32), #fordi 224 + 32 = 256. #kommenteret ud pga. at jeg til test bruger resized imgs
-            transforms.CenterCrop(net.input_size + 32),
+            #transforms.CenterCrop(net.input_size + 32),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
@@ -44,7 +44,7 @@ def KfoldTrain(net):
 
         num_epochs=2 # fra 10
         batch_size=net.batch_size #fra 128
-        k = 5 # dvs. hver fold er 1/10.
+        k = 3 # dvs. hver fold er 1/10.
         
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
@@ -73,8 +73,6 @@ def KfoldTrain(net):
         #endregion
 
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFoldDataset)))):
-            if not args.kfold and fold > 0: #kun 1 fold!!!
-                break
             #Load parameter and optimizer fra inden modellen er kørt
             net.model.load_state_dict(parameterDefault)
             net.optimizer.load_state_dict(optimizerDefault)
