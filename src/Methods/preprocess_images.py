@@ -7,7 +7,7 @@ import PIL
 import math
 
 imgpath = r"C:\Users\PC\Desktop\TB_Positve"
-imgs = [f for f in listdir(imgpath) if isfile(join(imgpath, f))]
+#imgs = [f for f in listdir(imgpath) if isfile(join(imgpath, f))]
 #maskpath = r"..\PP_data2\TB_negative"
 #masks = [f for f in listdir(maskpath) if isfile(join(maskpath, f))]
 
