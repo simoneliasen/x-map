@@ -6,10 +6,10 @@ from PIL import Image
 import PIL
 import math
 
-imgpath = r"..\PP_data2\TB_positive"
+imgpath = r"C:\Users\PC\Desktop\TB_Positve"
 imgs = [f for f in listdir(imgpath) if isfile(join(imgpath, f))]
-maskpath = r"..\PP_data2\TB_negative"
-masks = [f for f in listdir(maskpath) if isfile(join(maskpath, f))]
+#maskpath = r"..\PP_data2\TB_negative"
+#masks = [f for f in listdir(maskpath) if isfile(join(maskpath, f))]
 
 masked_img_path = r"..\mask_test\masked_img"
 
@@ -81,26 +81,55 @@ def add_mask2name():
         new_path = f"{maskpath}\\{new_name}"
         os.rename(path, new_path)
 
-def downscale():
-    for img in imgs:
-        path = f"{imgpath}\\{img}"
-        im = Image.open(path)
-        width, height = im.size
-        new_width = round(width / 10)
-        new_height = round(height / 10)
-        new_size = (new_width, new_height)
-        new = im.resize(new_size)
-        new.save(path)
+def downscale(size):
+    pospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Positive"
+    pos = [f for f in listdir(pospath) if isfile(join(pospath, f))]
 
-    for mask in masks:
-        path = f"{maskpath}\\{mask}"
+    negpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Negative"
+    neg = [f for f in listdir(negpath) if isfile(join(negpath, f))]
+
+    newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized/TB_Positive"
+    newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized/TB_Negative"
+
+    for img in pos:
+        path = f"{pospath}\\{img}"
         im = Image.open(path)
         width, height = im.size
-        new_width = round(width / 10)
-        new_height = round(height / 10)
-        new_size = (new_width, new_height)
+        aspect_ratio = width / height
+        new_width = 0.0
+        new_height = 0.0
+
+        if width > height:
+            new_width = size * aspect_ratio
+            new_height = size
+        else:
+            new_height = size * aspect_ratio
+            new_width = size
+        
+        new_size = (int(new_width), int(new_height))
         new = im.resize(new_size)
-        new.save(path)
+        new_path = f"{newpospath}\\{img}"
+        new.save(new_path)
+
+    for img in neg:
+        path = f"{negpath}\\{img}"
+        im = Image.open(path)
+        width, height = im.size
+        aspect_ratio = width / height
+        new_width = 0.0
+        new_height = 0.0
+
+        if width > height:
+            new_width = size * aspect_ratio
+            new_height = size
+        else:
+            new_height = size * aspect_ratio
+            new_width = size
+        
+        new_size = (int(new_width), int(new_height))
+        new = im.resize(new_size)
+        new_path = f"{newnegpath}\\{img}"
+        new.save(new_path)
 
 #gjorde ingenting:
 def convert2jpg():
@@ -131,5 +160,5 @@ def convert_mask2p():
         im = im.convert('P')
         im.save(new_path)
 
-downscale()
+downscale(224)
 
