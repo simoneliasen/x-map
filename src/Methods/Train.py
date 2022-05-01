@@ -73,6 +73,8 @@ def KfoldTrain(net):
         #endregion
 
         for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFoldDataset)))):
+            if not args.kfold and fold > 0: #kun 1 fold!!!
+                break
             #Load parameter and optimizer fra inden modellen er kørt
             net.model.load_state_dict(parameterDefault)
             net.optimizer.load_state_dict(optimizerDefault)
@@ -99,7 +101,7 @@ def KfoldTrain(net):
             # Early stopping
             best_val_loss = 9999999999999999999.9
             best_val_loss_acc = 0.0
-            patience = 3 #bare til hyper tuning.
+            patience = 5 #bare til hyper tuning.
             trigger_times = 0
             epoch = 0
             

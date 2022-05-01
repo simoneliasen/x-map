@@ -10,6 +10,10 @@ def get_arguments():
     parser.add_argument('--no-wandb', dest='wandb', action='store_false')
     parser.set_defaults(wandb=True)
 
+    parser.add_argument('--kfold', dest='kfold', action='store_true')
+    parser.add_argument('--no-kfold', dest='kfold', action='store_false')
+    parser.set_defaults(kfold=True)
+
     parser.add_argument('--sweep', type=str, required=False)
 
     parser.add_argument('--scheduler', dest='scheduler', action='store_true')
