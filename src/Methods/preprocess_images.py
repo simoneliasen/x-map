@@ -92,7 +92,7 @@ def downscale(size):
     newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized/TB_Negative"
 
     for img in pos:
-        path = f"{pospath}\\{img}"
+        path = f"{pospath}/{img}"
         im = Image.open(path)
         width, height = im.size
         aspect_ratio = width / height
@@ -108,11 +108,11 @@ def downscale(size):
         
         new_size = (int(new_width), int(new_height))
         new = im.resize(new_size)
-        new_path = f"{newpospath}\\{img}"
+        new_path = f"{newpospath}/{img}"
         new.save(new_path)
 
     for img in neg:
-        path = f"{negpath}\\{img}"
+        path = f"{negpath}/{img}"
         im = Image.open(path)
         width, height = im.size
         aspect_ratio = width / height
@@ -128,7 +128,7 @@ def downscale(size):
         
         new_size = (int(new_width), int(new_height))
         new = im.resize(new_size)
-        new_path = f"{newnegpath}\\{img}"
+        new_path = f"{newnegpath}/{img}"
         new.save(new_path)
 
 #gjorde ingenting:
