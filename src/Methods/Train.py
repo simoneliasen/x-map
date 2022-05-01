@@ -312,17 +312,19 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
     valid_loss=0.0
     CMVAL = 0
     model.eval()
-    for images, labels in dataloader:
 
-        images,labels = images.to(device),labels.to(device)
-        #lav
+    with torch.no_grad(): #undgå cuda out of memoery fejl?
+        for images, labels in dataloader:
 
-        output = model(images)
-        loss = loss_fn(output,labels)
+            images,labels = images.to(device),labels.to(device)
+            #lav
 
-        valid_loss+=loss.item()*images.size(0)
-        scores, predictions = torch.max(output.data,1)
-        CMVAL+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
+            output = model(images)
+            loss = loss_fn(output,labels)
+
+            valid_loss+=loss.item()*images.size(0)
+            scores, predictions = torch.max(output.data,1)
+            CMVAL+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
     return valid_loss,CMVAL
 
