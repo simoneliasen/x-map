@@ -104,8 +104,8 @@ def downscale(size):
     negpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Negative"
     neg = [f for f in listdir(negpath) if isfile(join(negpath, f))]
 
-    newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized_cropped/TB_Positive"
-    newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized_cropped/TB_Negative"
+    newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized300_cropped/TB_Positive"
+    newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized300_cropped/TB_Negative"
 
     print(len(pos))
     print(len(neg))
@@ -188,5 +188,5 @@ def convert_mask2p():
         im = im.convert('P')
         im.save(new_path)
 
-downscale(256)
+downscale(300) #300 = inception
 
