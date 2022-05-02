@@ -287,12 +287,13 @@ def save_checkpoint(net, fold):
         
 
 def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
+        print('train epoch kører')
         train_loss=0.0
         CMTRAIN = 0
         model.train()
         for images, labels in dataloader:
             
-
+            print('images og labels bliver printet')
             images,labels = images.to(device),labels.to(device)
             optimizer.zero_grad()
 
