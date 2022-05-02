@@ -29,10 +29,11 @@ sweep_config = {
             'min': 0.000005,
             'max': 0.0001,
         },
-        #'dropout_rate': { #dense og resnext har ikke dropout
-        #    'min': 0.0,
-        #    'max': 0.5,
-        #},
+        'dropout_rate': { #dense og resnext har ikke dropout
+            'values': [0]
+            #'min': 0.0,
+            #'max': 0.5,
+        },
     }
 }
 
