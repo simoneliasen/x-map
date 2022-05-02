@@ -40,7 +40,9 @@ sweep_config['name'] = args.model
 if args.model in ["resnext", "densenet"]:
     print('speciel setting for: ', args.model)
     sweep_config['parameters']['batch_size']['values'] = [32, 64] #resnext og desne kan ik tage > 64
-    sweep_config['parameters']['dropout_rate']['max'] = 0.0 #dense og resnext har ikke dropout
+    del sweep_config['parameters']['dropout_rate']['max']#dense og resnext har ikke dropout
+    del sweep_config['parameters']['dropout_rate']['min']
+    sweep_config['parameters']['dropout_rate']['values'] = [0]
 
 _net = None
 
