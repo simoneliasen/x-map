@@ -109,7 +109,7 @@ class Net():
 model_names = ["densenet", "resnext", "vgg", "inception", "efficientnet"]
 
 if args.model == None:
-    net = Net("densenet") #skriv navnet på den du vil bruge.
+    net = Net("resnext") #skriv navnet på den du vil bruge.
 else:
     net = Net(args.model)
 

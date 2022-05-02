@@ -3,7 +3,7 @@ from Methods.parser import get_arguments
 args = get_arguments()
 
 sweep_config = {
-    'name': 'densenet',
+    'name': 'resnext',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
     'name': 'avg_val_acc',

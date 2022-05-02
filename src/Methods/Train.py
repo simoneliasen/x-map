@@ -106,7 +106,6 @@ def KfoldTrain(net):
             while epoch < 500:
 
                 epoch += 1
-                print('Epoch: ', epoch)
                 train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
                 train_loss = train_loss / len(train_loader.sampler)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
