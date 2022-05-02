@@ -11,7 +11,8 @@ sweep_config = {
         },
     'parameters': {
         'batch_size': { 
-            'values': [32, 64, 128] 
+            #'values': [32, 64, 128] 
+            'values': [32, 64] #resnext og desne kan ik tage > 64
         },
         'optimizer': {
             'values': ['sgd', 'rmsprop']
@@ -28,10 +29,10 @@ sweep_config = {
             'min': 0.000005,
             'max': 0.0001,
         },
-        'dropout_rate': { 
-            'min': 0.0,
-            'max': 0.5,
-        },
+        #'dropout_rate': { #dense og resnext har ikke dropout
+        #    'min': 0.0,
+        #    'max': 0.5,
+        #},
     }
 }
 
