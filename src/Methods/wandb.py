@@ -3,7 +3,7 @@ from Methods.parser import get_arguments
 args = get_arguments()
 
 sweep_config = {
-    'name': 'resnext',
+    'name': 'navn',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
     'name': 'avg_val_acc',
@@ -11,8 +11,7 @@ sweep_config = {
         },
     'parameters': {
         'batch_size': { 
-            #'values': [32, 64, 128] 
-            'values': [32, 64] #resnext og desne kan ik tage > 64
+            'values': [32, 64, 128]
         },
         'optimizer': {
             'values': ['sgd', 'rmsprop']
@@ -29,13 +28,19 @@ sweep_config = {
             'min': 0.000005,
             'max': 0.0001,
         },
-        'dropout_rate': { #dense og resnext har ikke dropout
-            'values': [0]
-            #'min': 0.0,
-            #'max': 0.5,
+        'dropout_rate': {
+            'min': 0.0,
+            'max': 0.5,
         },
     }
 }
+
+sweep_config['name'] = args.model
+
+if args.model in ["resnext", "densenet"]:
+    print('speciel setting for: ', args.model)
+    sweep_config['parameters']['batch_size']['values'] = [32, 64] #resnext og desne kan ik tage > 64
+    sweep_config['parameters']['dropout_rate']['max'] = 0.0 #dense og resnext har ikke dropout
 
 _net = None
 
