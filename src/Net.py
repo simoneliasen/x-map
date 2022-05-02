@@ -83,7 +83,8 @@ class Net():
             self.model.classifier = nn.Linear(num_features,num_classes)
 
         elif model_name == "resnext":
-            self.model = models.resnext101_32x8d(pretrained=pretrained)
+            self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnext50_32x4d', pretrained=True)
+            #self.model = models.resnext101_32x8d(pretrained=pretrained)
             num_features = self.model.fc.in_features
             self.model.fc = nn.Linear(num_features,num_classes)
 
