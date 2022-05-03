@@ -184,7 +184,7 @@ def KfoldTrain(net):
 
 
 
-                    print("Epoch:{} AVG Training Loss:{:.8f} AVG Val Loss:{:.8f} AVG Training Acc {:.8f} % AVG Val Acc {:.8f} %".format(epoch,
+                    print("Epoch:{} AVG Training Loss:{:.8f} AVG Val Loss:{:.8f} AVG Training Acc {:.2f} % AVG Val Acc {:.2f} %".format(epoch,
                                                                                                                         train_loss,
                                                                                                                         val_loss,
                                                                                                                         train_acc,
