@@ -52,10 +52,14 @@ _net = None
 def wandb_initialize(net):
     global _net
     _net = net
-    sweep_id = wandb.sweep(sweep_config, project="my-test-project", entity="thebigyesman")
-    sweep_id2 = sweep_id if args.sweep is None else args.sweep
-    wandb.agent(sweep_id=sweep_id2, function=sweep)
-    #kan også bruge et specifikt sweep_id, fx f7pvbfd4 (find på wandb under sweeps)
+
+    if args.sweep is None:
+        sweep_id = wandb.sweep(sweep_config, project="my-test-project", entity="thebigyesman")
+        wandb.agent(sweep_id=sweep_id, function=sweep)
+    else:
+        sweep_id = args.sweep
+        wandb.agent(sweep_id=sweep_id, function=sweep)
+    
     #wandb.watch(model)
 
 def wandb_log(train_loss, val_loss, train_acc, val_acc):
