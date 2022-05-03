@@ -198,7 +198,7 @@ def KfoldTrain(net):
                     #print('The Current Loss:', val_loss)
                     val_loss_rounded = float(format(val_loss, '.4f'))
 
-                    if val_loss_rounded > best_val_loss: #ergo: den nye val er dårligere
+                    if val_loss_rounded >= best_val_loss: #ergo: den nye val er dårligere eller ligeså god
 
                         trigger_times += 1
                         print('Trigger Times:', trigger_times)
