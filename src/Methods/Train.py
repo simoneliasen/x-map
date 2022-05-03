@@ -250,7 +250,7 @@ def KfoldTrain(net):
                             print('cumu val acc: ' ,cumu_val_acc)
                                 
                     else: #ergo: den nye val er bedre
-                        save_checkpoint(net, fold)
+                        #save_checkpoint(net, fold)
                         trigger_times = 0
                         best_val_loss = val_loss_rounded
                         best_val_loss_acc = val_acc
