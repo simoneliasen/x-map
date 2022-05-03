@@ -37,6 +37,9 @@ sweep_config = {
 
 sweep_config['name'] = args.model
 
+if args.sweep is not None: #ellers laver den en ny empty sweep med det navn på wandb dashboard
+    del sweep_config['name']
+
 if args.model in ["resnext", "densenet"]:
     print('speciel setting for: ', args.model)
     sweep_config['parameters']['batch_size']['values'] = [32, 64] #resnext og desne kan ik tage > 64
