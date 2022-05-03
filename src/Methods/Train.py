@@ -14,6 +14,7 @@ import random
 import copy
 import os
 import glob 
+import math
 
 from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
@@ -106,7 +107,8 @@ def KfoldTrain(net):
             while epoch < 500:
 
                 epoch += 1
-                print('Epoch: ', epoch)
+                if epoch < 4: #lidt nemmere debug
+                    print('Epoch: ', epoch) 
                 train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
                 train_loss = train_loss / len(train_loader.sampler)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
@@ -142,6 +144,9 @@ def KfoldTrain(net):
                     val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
                     val_loss = val_loss / len(val_loader.sampler)
                     val_acc = (np.sum(np.diag(CMVAL)/np.sum(CMVAL))*100)
+
+                    if math.isnan(val_loss): #hvis resultatet er helt ude i hampen, bliver det nan. = nicht gud
+                        val_loss = 9999999999999999999.9
                     
                     if args.wandb:
                       wandb_log(train_loss, val_loss, train_acc, val_acc)
