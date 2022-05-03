@@ -39,28 +39,33 @@ class Net():
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None: #altså ingen wandb
-            if args.batch_size == None:
-                self.batch_size = 64
-            else:
-                self.batch_size = args.batch_size
-
-            self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-            self.scheduler = None
-
-        else:
-            self.batch_size = params['batch_size']
-            if self.model_name == "densenet" and self.batch_size > 65:
-                self.batch_size = 64
+            #sæt selv dine params her:
+            #det er replicate af efficientnet, volcanic sweep, der fik avg_val_acc på 68 %. Får den ca. det samme nu?
+            custom_params = {
+                'batch_size': 32,
+                'dropout_rate': 0.16568986002637803,
+                'exponential_scheduler': 0.015331980625274896,
+                'lr': 0.053793229179152205,
+                'optimizer': 'rmsprop',
+                'weight_decay': 0.00006933502791278179,
+            }
+            if args.batch_size is not None:
+                custom_params['batch_size'] = args.batch_size
             
-            self.set_dropout(params['dropout_rate'])
+            params = custom_params
+            print('custom hyperpameters!', params)
 
-            if params['optimizer'] == "sgd":
-                self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
-            elif params['optimizer'] == "rmsprop":
-                self.optimizer = optim.RMSprop(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
-            
-            if args.scheduler:
-                self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=params['exponential_scheduler'])
+        #Og load params:
+        self.batch_size = params['batch_size']
+        self.set_dropout(params['dropout_rate'])
+
+        if params['optimizer'] == "sgd":
+            self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
+        elif params['optimizer'] == "rmsprop":
+            self.optimizer = optim.RMSprop(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
+        
+        if args.scheduler:
+            self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=params['exponential_scheduler'])
 
         
 

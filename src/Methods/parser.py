@@ -14,6 +14,10 @@ def get_arguments():
     parser.add_argument('--no-kfold', dest='kfold', action='store_false')
     parser.set_defaults(kfold=True)
 
+    parser.add_argument('--custom_config', help="skriv config i net.py set_hyperparameters()!!!", dest='custom_config', action='store_true')
+    parser.add_argument('--no-custom_config', dest='custom_config', action='store_false')
+    parser.set_defaults(custom_config=False)
+
     parser.add_argument('--sweep', type=str, required=False)
 
     parser.add_argument('--scheduler', dest='scheduler', action='store_true')
