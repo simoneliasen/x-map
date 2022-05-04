@@ -61,6 +61,7 @@ def KfoldTrain(net):
         KFoldDataset = torch.utils.data.Subset(dataset, kfold_idx)        
         
         cumu_val_acc = 0.0
+        cumu_val_loss = 0.0
         cumu_test_acc = 0.0
 
         #region To get final test result for all folds
@@ -247,7 +248,8 @@ def KfoldTrain(net):
                             #endregion
                             print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
                             cumu_val_acc += best_val_loss_acc
-                            print('cumu val acc: ' ,cumu_val_acc)
+                            cumu_val_loss += best_val_loss
+                            print('cumu val loss: ' ,cumu_val_loss)
                                 
                     else: #ergo: den nye val er bedre
                         save_checkpoint(net, fold)
@@ -256,8 +258,9 @@ def KfoldTrain(net):
                         best_val_loss_acc = val_acc
 
         avg_val_acc = cumu_val_acc / float(k)
+        avg_val_loss = cumu_val_loss / float(k)
         print('avg_val_acc er: ', avg_val_acc)
-        wandb_log_folds_avg(avg_val_acc)
+        wandb_log_folds_avg(avg_val_acc, avg_val_loss)
 
         #region log ting
         Total_Test_Avg_Loss = Total_Test_Avg_Loss / k
@@ -282,10 +285,8 @@ def KfoldTrain(net):
 def save_checkpoint(net, fold):
         fold_string = str(fold)
         model_name_string = str(net.model_name)
-        print(model_name_string)
         model_file_string = f"/content/x-map/src/checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{model_name_string}.pth"
         optimizer_file_string = f"/content/x-map/src/checkpoints//{model_name_string}/optimizer/optimizercheckpoint-{fold_string}-{model_name_string}.pth"
-        print(optimizer_file_string)
         model_FILE = model_file_string
         optimizer_FILE = optimizer_file_string
         torch.save(net.model.state_dict(), model_FILE)
