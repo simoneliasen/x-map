@@ -1,4 +1,5 @@
 import wandb
+from copy import deepcopy
 from Methods.parser import get_arguments
 args = get_arguments()
 
@@ -73,6 +74,7 @@ def wandb_log_folds_avg(avg_val_acc):
 
 def sweep():
     wandb.init(config=sweep_config)
-    _net.set_hyperparameters(wandb.config)
+    net_copy = deepcopy(_net)
+    net_copy.set_hyperparameters(wandb.config)
     from Methods.Train import KfoldTrain
-    KfoldTrain(_net)
+    KfoldTrain(net_copy)
