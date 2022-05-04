@@ -56,6 +56,7 @@ class Net():
             print('custom hyperpameters!', params)
 
         if self.model_name == "densenet" and params['batch_size'] > 65:
+            print('nedsat batch size til 64')
             params['batch_size'] = 64
 
         #Og load params:
