@@ -7,8 +7,8 @@ sweep_config = {
     'name': 'navn',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
-    'name': 'avg_val_acc',
-    'goal': 'maximize'   
+    'name': 'avg_val_loss',
+    'goal': 'minimize'   
         },
     'parameters': {
         'batch_size': { 
