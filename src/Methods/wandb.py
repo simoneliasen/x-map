@@ -47,6 +47,10 @@ if args.model in ["resnext", "densenet"]:
     del sweep_config['parameters']['dropout_rate']['min']
     sweep_config['parameters']['dropout_rate']['values'] = [0]
 
+if args.model in ["vgg"]:
+    print('speciel setting for: ', args.model)
+    sweep_config['parameters']['batch_size']['values'] = [32, 64]
+
 _net = None
 
 def wandb_initialize(net):
