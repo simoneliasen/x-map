@@ -55,6 +55,9 @@ class Net():
             params = custom_params
             print('custom hyperpameters!', params)
 
+        if self.model_name == "densenet" and params['batch_size'] > 65:
+            params['batch_size'] = 64
+
         #Og load params:
         self.batch_size = params['batch_size']
         self.set_dropout(params['dropout_rate'])
