@@ -282,8 +282,8 @@ def KfoldTrain(net):
 def save_checkpoint(net, fold):
         fold_string = str(fold)
         model_name_string = str(net.model_name)
-        model_file_string = f"./checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{model_name_string}.pth"
-        optimizer_file_string = f"./checkpoints/{model_name_string}/optimizer/optimizercheckpoint-{fold_string}-{model_name_string}.pth"
+        model_file_string = f"/content/x-map/src/checkpoints/{model_name_string}/model/modelcheckpoint-{fold_string}-{model_name_string}.pth"
+        optimizer_file_string = f"/content/x-map/src/checkpoints/{model_name_string}/optimizer/optimizercheckpoint-{fold_string}-{model_name_string}.pth"
         model_FILE = model_file_string
         optimizer_FILE = optimizer_file_string
         torch.save(net.model.state_dict(), model_FILE)
@@ -361,7 +361,7 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
 def load_checkpoint(net, string):
     #load model
     if string == "model":
-        path_string = f"./checkpoints/{net.model_name}/model/*.pth"
+        path_string = f"/content/x-map/src/checkpoints/{net.model_name}/model/*.pth"
         list_of_files = glob.glob(f'{path_string}') # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)
         print("You have loaded the modelcheckpoint: " + latest_file)
@@ -370,7 +370,7 @@ def load_checkpoint(net, string):
         #load optimizer
        
     if string == "optimizer":
-        path_string = f"./checkpoints/{net.model_name}/optimizer/*.pth"
+        path_string = f"/content/x-map/src/checkpoints/{net.model_name}/optimizer/*.pth"
         list_of_files = glob.glob(f'{path_string}') # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)
         print("You have loaded the optimizercheckpoint: " + latest_file)
