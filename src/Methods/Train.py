@@ -15,6 +15,7 @@ import copy
 import os
 import glob 
 import math
+from torch import nn
 
 from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
@@ -110,7 +111,7 @@ def KfoldTrain(net):
                 epoch += 1
                 if epoch < 4: #lidt nemmere debug
                     print('Epoch: ', epoch) 
-                train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
+                train_loss, CMTRAIN=train_epoch(net, train_loader)
                 train_loss = train_loss / len(train_loader.sampler)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
           
@@ -294,7 +295,16 @@ def save_checkpoint(net, fold):
 
         
 
-def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
+def train_epoch(net,dataloader):
+        model = net.model
+        device = net.device
+        optimizer = net.optimizer
+        is_inception = net.is_inception
+        loss_fn = net.criterion
+        loss_fn2 = net.criterion2
+
+        sig = nn.Sigmoid()
+
         train_loss=0.0
         CMTRAIN = 0
         model.train()
@@ -311,6 +321,15 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
             else:
                 output = model(images)
                 loss = loss_fn(output,labels)
+
+                output2 = model(sig(images))
+                loss2 = loss_fn2(output2, labels)
+
+                print('output: ', output)
+                print('loss: ', loss)
+                print('output2: ', output2)
+                print('loss2: ', loss2)
+                print("--------------------------------------------------------------------------------------")
 
             loss.backward()
             optimizer.step()

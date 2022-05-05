@@ -36,13 +36,14 @@ class Net():
             KfoldTrain(self)
 
     def set_hyperparameters(self, params=None):
+        self.criterion2 = nn.BCELoss().cuda() if torch.cuda.is_available() else nn.BCELoss()
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None: #altså ingen wandb
             #sæt selv dine params her:
             #det er replicate af efficientnet, soft-sweep-1, der fik avg_val_acc på 96 %. Får den ca. det samme nu?
             custom_params = {
-                'batch_size': 128,
+                'batch_size': 4,
                 'dropout_rate': 0.3767308917931543,
                 'exponential_scheduler': 0.027965205443403057,
                 'lr': 0.07354546106236301,

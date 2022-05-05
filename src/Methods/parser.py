@@ -8,7 +8,7 @@ def get_arguments():
     #parser.add_argument("--wandb", help="use wandb?", default=True, action=argparse.BooleanOptionalAction) #colab har ik python 3.9 :((((
     parser.add_argument('--wandb', dest='wandb', action='store_true')
     parser.add_argument('--no-wandb', dest='wandb', action='store_false')
-    parser.set_defaults(wandb=True)
+    parser.set_defaults(wandb=False)
 
     parser.add_argument('--kfold', dest='kfold', action='store_true')
     parser.add_argument('--no-kfold', dest='kfold', action='store_false')
