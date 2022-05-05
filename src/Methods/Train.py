@@ -324,6 +324,9 @@ def train_epoch(net,dataloader):
                 print('output: ', output)
                 print('loss: ', loss)
 
+                sig_res = sig(images)
+                print('sig res:')
+                print(sig_res)
                 output2 = model(sig(images))
                 loss2 = loss_fn2(output2, labels)
 
