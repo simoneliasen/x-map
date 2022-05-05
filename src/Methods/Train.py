@@ -305,12 +305,12 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
 
             if is_inception:
                 output, aux_outputs = model(images)
-                loss1 = loss_fn(output, labels)
-                loss2 = loss_fn(aux_outputs, labels)
+                loss1 = loss_fn(torch.flatten(output), labels.float())
+                loss2 = loss_fn(torch.flatten(aux_outputs), labels.float())
                 loss = loss1 + 0.4*loss2
             else:
                 output = model(images)
-                loss = loss_fn(output,labels)
+                loss = loss_fn(torch.flatten(output), labels.float()) #bcewithlogits
 
             loss.backward()
             optimizer.step()
@@ -325,14 +325,14 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
     CMVAL = 0
     model.eval()
 
-    with torch.no_grad(): #undgå cuda out of memoery fejl?
+    with torch.no_grad(): #undgå cuda out of memoery fejl
         for images, labels in dataloader:
 
             images,labels = images.to(device),labels.to(device)
-            #lav
 
             output = model(images)
-            loss = loss_fn(output,labels)
+            #loss = loss_fn(output, labels) #uden Binary cross entrophy
+            loss = loss_fn(torch.flatten(output), labels.float()) #med Binary cross entrophy
 
             valid_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
@@ -350,10 +350,9 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
         for images, labels in dataloader:
 
             images,labels = images.to(device),labels.to(device)
-            #lav
 
             output = model(images)
-            loss = loss_fn(output,labels)
+            loss = loss_fn(torch.flatten(output), labels.float())
 
             test_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
