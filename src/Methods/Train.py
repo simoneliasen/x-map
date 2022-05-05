@@ -313,6 +313,7 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
                 
                 loss = loss_fn(torch.flatten(output), labels.float()) #bcewithlogits
                 print('output: ', output)
+                print('labels: ', labels.float())
                 print('loss: ', loss)
 
             loss.backward()
