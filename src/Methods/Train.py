@@ -321,23 +321,15 @@ def train_epoch(net,dataloader):
                 loss = loss1 + 0.4*loss2
             else:
                 output = model(images)
-                #loss = loss_fn(output,labels)
-                print('output: ', output)
                 output2 = torch.flatten(output)
-                print(output2)
-                #print('loss: ', loss)
+                print('output2:', output2)
+                print('labels float: ', labels.float())
 
-                #sig_res = sig(images)
-                #print('sig res:')
-                #print(sig_res)
-                #output2 = model(sig(images))
-                #loss2 = loss_fn2(output2, labels)
                 loss2 = loss_fn3(output2, labels.float())
-
-                
-                #print('output2: ', output2)
                 print('loss2: ', loss2)
-                print("--------------------------------------------------------------------------------------")
+                print('loss2.item(): ', loss2.item())
+                print('images.size(0): ', images.size(0))
+                print("---------------------------------------------------------------------------")
 
             loss2.backward()
             optimizer.step()
