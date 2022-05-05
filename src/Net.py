@@ -86,32 +86,58 @@ class Net():
             self.model.classifier[0] = nn.Dropout(p=dropout_rate, inplace=True)
 
     def load_model(self, model_name, pretrained, num_classes):
+        v = args.model_version
+
         if model_name == "densenet":
-            self.model = models.densenet121(pretrained=pretrained)
+            if v == 0:
+                self.model = models.densenet121(pretrained=pretrained)
+            elif v == 1:
+                self.model = models.densenet161(pretrained=pretrained)
+            elif v == 2:
+                self.model = models.densenet201(pretrained=pretrained)
+            
             num_features = self.model.classifier.in_features 
             self.model.classifier = nn.Linear(num_features,num_classes)
 
         elif model_name == "resnext":
-            self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnext50_32x4d', pretrained=True)
-            print(self.model.fc)
-            #self.model = models.resnext101_32x8d(pretrained=pretrained)
+            if v == 0:
+                self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnext50_32x4d', pretrained=True)
+            elif v == 1:
+                self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnext101_32x8d', pretrained=True)
+            
             num_features = self.model.fc.in_features
             self.model.fc = nn.Linear(num_features,num_classes)
 
         elif model_name == "vgg":
-            self.model = models.vgg11_bn(pretrained=pretrained)
+            if v == 0:
+                self.model = models.vgg11_bn(pretrained=pretrained)
+            elif v == 1:
+                self.model = models.vgg16_bn(pretrained=pretrained)
+            elif v == 2:
+                self.model = models.vgg19_bn(pretrained=pretrained)
+            
+            print(self.model.classifier)
             self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
 
         elif model_name == "inception":
             self.is_inception = True
-            self.model = models.inception_v3(pretrained=pretrained)
+
+            if v == 0:
+                self.model = models.inception_v3(pretrained=pretrained)
+            
             self.model.AuxLogits.fc = nn.Linear(768, num_classes)
             self.model.fc = nn.Linear(2048, num_classes)
             self.input_size = 299
 
         elif model_name == "efficientnet":
-            self.model = models.efficientnet_b0(pretrained=pretrained)
+            if v == 0:
+                self.model = models.efficientnet_b0(pretrained=pretrained)
+            elif v == 1:
+                self.model = models.efficientnet_b4(pretrained=pretrained)
+            elif v == 2:
+                self.model = models.efficientnet_b7(pretrained=pretrained)
             #infeatures b4=1792, b5=2048, b6=2304
+            print(self.model.classifier)
             self.model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes, bias=True)
 
             

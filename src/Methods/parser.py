@@ -26,6 +26,7 @@ def get_arguments():
     
     parser.add_argument('--model', type=str, help="vælg en fra model_names", required=False)
     parser.add_argument('--batch_size', type=int, required=False)
+    parser.add_argument('--model_version', type=int, required=False, default=0)
 
     # Parse the argument
     args = parser.parse_args()
