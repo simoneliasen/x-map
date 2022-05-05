@@ -12,7 +12,7 @@ sweep_config = {
         },
     'parameters': {
         'batch_size': { 
-            'values': [32, 64, 128]
+            'values': [32, 64]
         },
         'optimizer': {
             'values': ['sgd', 'rmsprop']
@@ -36,21 +36,49 @@ sweep_config = {
     }
 }
 
-sweep_config['name'] = args.model
+def load_model_sweep_configs():
+    sweep_config['name'] = args.model
 
-if args.sweep is not None: #ellers laver den en ny empty sweep med det navn på wandb dashboard
-    del sweep_config['name']
+    #ellers laver den en ny empty sweep med det navn på wandb dashboard
+    if args.sweep is not None: 
+        del sweep_config['name']
 
-if args.model in ["resnext", "densenet"]:
-    print('speciel setting for: ', args.model)
-    sweep_config['parameters']['batch_size']['values'] = [32, 64] #resnext og desne kan ik tage > 64
-    del sweep_config['parameters']['dropout_rate']['max']#dense og resnext har ikke dropout
-    del sweep_config['parameters']['dropout_rate']['min']
-    sweep_config['parameters']['dropout_rate']['values'] = [0]
+    #dense og resnext har ikke dropout
+    if args.model in ["resnext", "densenet"]:
+        print('ingen dropout for: ', args.model)
+        del sweep_config['parameters']['dropout_rate']
 
-if args.model in ["vgg"]:
-    print('speciel setting for: ', args.model)
-    sweep_config['parameters']['batch_size']['values'] = [32, 64]
+    #128 i max batch
+    if args.model in ["inception"]:
+        sweep_config['parameters']['batch_size']['values'] = [32, 64, 128]
+
+    if args.model == "efficientnet" and args.model_version == 0:
+        sweep_config['parameters']['batch_size']['values'] = [32, 64, 128]
+
+    #32 i maxbatch size
+    if args.model == "resnext" and args.model_version == 1:
+        sweep_config['parameters']['batch_size']['values'] = [32]
+
+    if args.model == "densenet" and args.model_version == 1:
+        sweep_config['parameters']['batch_size']['values'] = [32]
+
+    if args.model == "densenet" and args.model_version == 2:
+        sweep_config['parameters']['batch_size']['values'] = [32]
+
+
+    #16 i max batch
+    if args.model == "efficientnet" and args.model_version == 1:
+        sweep_config['parameters']['batch_size']['values'] = [16]
+
+
+    #2 i max batch
+    if args.model == "efficientnet" and args.model_version == 2:
+        sweep_config['parameters']['batch_size']['values'] = [2]
+
+
+    print('batch range er: ', sweep_config['parameters']['batch_size']['values'])
+
+load_model_sweep_configs()
 
 _net = None
 
