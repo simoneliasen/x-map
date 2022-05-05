@@ -321,12 +321,13 @@ def train_epoch(net,dataloader):
             else:
                 output = model(images)
                 loss = loss_fn(output,labels)
+                print('output: ', output)
+                print('loss: ', loss)
 
                 output2 = model(sig(images))
                 loss2 = loss_fn2(output2, labels)
 
-                print('output: ', output)
-                print('loss: ', loss)
+                
                 print('output2: ', output2)
                 print('loss2: ', loss2)
                 print("--------------------------------------------------------------------------------------")
