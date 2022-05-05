@@ -14,7 +14,7 @@ print(args)
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
 class Net():
-    def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 1, checkpoint = False): #features = tb positive/negative
+    def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 2, checkpoint = False): #features = tb positive/negative
         self.model_path = './resnet.pth'
         self.model_name = model_name
         self.data_dir = args.data_path #skal være opdelt i TB_positive og TB_negative
@@ -36,7 +36,8 @@ class Net():
             KfoldTrain(self)
 
     def set_hyperparameters(self, params=None):
-        self.criterion = nn.BCEWithLogitsLoss().cuda() if torch.cuda.is_available() else nn.BCEWithLogitsLoss()
+        #self.criterion = nn.BCEWithLogitsLoss().cuda() if torch.cuda.is_available() else nn.BCEWithLogitsLoss()
+        self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None: #altså ingen wandb
             #sæt selv dine params her:

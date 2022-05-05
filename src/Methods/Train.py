@@ -111,9 +111,7 @@ def KfoldTrain(net):
                 if epoch < 4: #lidt nemmere debug
                     print('Epoch: ', epoch) 
                 train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
-                print('train loss: ', train_loss)
                 train_loss = train_loss / len(train_loader.sampler)
-                print('train loss / len sampler: ', train_loss)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
           
                 if net.scheduler is not None:
@@ -307,22 +305,16 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
 
             if is_inception:
                 output, aux_outputs = model(images)
-                loss1 = loss_fn(torch.flatten(output), labels.float())
-                loss2 = loss_fn(torch.flatten(aux_outputs), labels.float())
+                loss1 = loss_fn(output, labels)
+                loss2 = loss_fn(aux_outputs, labels)
                 loss = loss1 + 0.4*loss2
             else:
                 output = model(images)
-                
-                loss = loss_fn(torch.flatten(output), labels.float()) #bcewithlogits
-                #print('output: ', output)
-                #print('labels: ', labels.float())
-                #print('loss: ', loss)
+                loss = loss_fn(output,labels)
 
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * images.size(0)
-            #print('train loss: ', train_loss)
-            #print("------------------------------------------------")
             scores, predictions = torch.max(output.data, 1)
             CMTRAIN+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1])           
 
@@ -339,8 +331,8 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
             images,labels = images.to(device),labels.to(device)
 
             output = model(images)
-            #loss = loss_fn(output, labels) #uden Binary cross entrophy
-            loss = loss_fn(torch.flatten(output), labels.float()) #med Binary cross entrophy
+            loss = loss_fn(output, labels) #uden Binary cross entrophy
+            #loss = loss_fn(torch.flatten(output), labels.float()) #med Binary cross entrophy
 
             valid_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
@@ -360,7 +352,7 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
             images,labels = images.to(device),labels.to(device)
 
             output = model(images)
-            loss = loss_fn(torch.flatten(output), labels.float())
+            loss = loss_fn(output,labels)
 
             test_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
