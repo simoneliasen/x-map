@@ -302,6 +302,7 @@ def train_epoch(net,dataloader):
         is_inception = net.is_inception
         loss_fn = net.criterion
         loss_fn2 = net.criterion2
+        loss_fn3 = net.criterion3
 
         sig = nn.Sigmoid()
 
@@ -324,14 +325,15 @@ def train_epoch(net,dataloader):
                 print('output: ', output)
                 print('loss: ', loss)
 
-                sig_res = sig(images)
-                print('sig res:')
-                print(sig_res)
-                output2 = model(sig(images))
-                loss2 = loss_fn2(output2, labels)
+                #sig_res = sig(images)
+                #print('sig res:')
+                #print(sig_res)
+                #output2 = model(sig(images))
+                #loss2 = loss_fn2(output2, labels)
+                loss2 = loss_fn3(output, labels)
 
                 
-                print('output2: ', output2)
+                #print('output2: ', output2)
                 print('loss2: ', loss2)
                 print("--------------------------------------------------------------------------------------")
 
