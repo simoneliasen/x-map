@@ -139,7 +139,7 @@ def KfoldTrain(net):
                 total_steps += len(train_loader.sampler)
 
                 #Her ændres hvor tit man vil tage checkpoint, 1 = hver gang
-                if epoch % 1 == 0: #fra 3, BARE TEST!
+                if epoch % 3 == 0:
                     
 
                     val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)               
