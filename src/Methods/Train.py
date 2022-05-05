@@ -310,11 +310,16 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
                 loss = loss1 + 0.4*loss2
             else:
                 output = model(images)
+                
                 loss = loss_fn(torch.flatten(output), labels.float()) #bcewithlogits
+                print('output: ', output)
+                print('loss: ', loss)
 
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * images.size(0)
+            print('train loss: ', train_loss)
+            print("------------------------------------------------")
             scores, predictions = torch.max(output.data, 1)
             CMTRAIN+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1])           
 
