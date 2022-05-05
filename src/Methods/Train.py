@@ -332,7 +332,7 @@ def train_epoch(net,dataloader):
                 #print(sig_res)
                 #output2 = model(sig(images))
                 #loss2 = loss_fn2(output2, labels)
-                loss2 = loss_fn3(output2, labels)
+                loss2 = loss_fn3(output2, labels.float())
 
                 
                 #print('output2: ', output2)
