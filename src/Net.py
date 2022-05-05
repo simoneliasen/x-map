@@ -40,14 +40,14 @@ class Net():
 
         if params is None: #altså ingen wandb
             #sæt selv dine params her:
-            #det er replicate af efficientnet, soft-sweep-1, der fik avg_val_acc på 96 %. Får den ca. det samme nu?
+            #det er replicate af bedste dense, 96 %
             custom_params = {
                 'batch_size': 128,
-                'dropout_rate': 0.3767308917931543,
-                'exponential_scheduler': 0.027965205443403057,
-                'lr': 0.07354546106236301,
+                'dropout_rate': 0.24440731964335,
+                'exponential_scheduler': 0.035154360729800244,
+                'lr': 0.022893282947991072,
                 'optimizer': 'rmsprop',
-                'weight_decay': 0.00009905399059104637,
+                'weight_decay': 0.00004055743590371694,
             }
             if args.batch_size is not None:
                 custom_params['batch_size'] = args.batch_size
