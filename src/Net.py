@@ -128,13 +128,17 @@ class Net():
         elif model_name == "efficientnet":
             if v == 0:
                 self.model = models.efficientnet_b0(pretrained=pretrained)
+                print(self.model.classifier)
+                self.model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes, bias=True)
             elif v == 1:
                 self.model = models.efficientnet_b4(pretrained=pretrained)
+                print(self.model.classifier)
+                self.model.classifier[1] = nn.Linear(in_features=1792, out_features=num_classes, bias=True)
             elif v == 2:
                 self.model = models.efficientnet_b7(pretrained=pretrained)
-            #infeatures b4=1792, b5=2048, b6=2304
-            print(self.model.classifier)
-            self.model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes, bias=True)
+                print(self.model.classifier)
+                self.model.classifier[1] = nn.Linear(in_features=2560, out_features=num_classes, bias=True)
+            
 
             
             

@@ -97,15 +97,15 @@ def add_padding(size, img):
     return black_mask
 
 def downscale(size):
-    pospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Positive"
+    pospath = r"C:\Users\PC\Desktop\nyt datasæt\PP_data\TB_Positive"
     #pospath = r"C:\Users\PC\Desktop\hejmor"
     pos = [f for f in listdir(pospath) if isfile(join(pospath, f))]
 
-    negpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2/TB_Negative"
+    negpath = r"C:\Users\PC\Desktop\nyt datasæt\PP_data\TB_Negative"
     neg = [f for f in listdir(negpath) if isfile(join(negpath, f))]
 
-    newpospath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized300_cropped/TB_Positive"
-    newnegpath = r"/content/drive/MyDrive/6. PP_data/PP_data_v2_resized300_cropped/TB_Negative"
+    newpospath = r"C:\Users\PC\Desktop\nyt datasæt\data_" + str(size) + "\TB_Positive"
+    newnegpath = r"C:\Users\PC\Desktop\nyt datasæt\data_" + str(size) + "\TB_Negative"
 
     print(len(pos))
     print(len(neg))
@@ -188,5 +188,6 @@ def convert_mask2p():
         im = im.convert('P')
         im.save(new_path)
 
-downscale(300) #300 = inception
+for size in [229, 380, 600]:
+    downscale(size) #300 = inception
 
