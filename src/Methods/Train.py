@@ -323,6 +323,8 @@ def train_epoch(net,dataloader):
                 output = model(images)
                 #loss = loss_fn(output,labels)
                 print('output: ', output)
+                output2 = torch.flatten(output)
+                print(output2)
                 #print('loss: ', loss)
 
                 #sig_res = sig(images)
@@ -330,7 +332,7 @@ def train_epoch(net,dataloader):
                 #print(sig_res)
                 #output2 = model(sig(images))
                 #loss2 = loss_fn2(output2, labels)
-                loss2 = loss_fn3(output, labels)
+                loss2 = loss_fn3(output2, labels)
 
                 
                 #print('output2: ', output2)
