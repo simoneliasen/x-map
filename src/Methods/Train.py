@@ -111,7 +111,9 @@ def KfoldTrain(net):
                 if epoch < 4: #lidt nemmere debug
                     print('Epoch: ', epoch) 
                 train_loss, CMTRAIN=train_epoch(net.model,device,train_loader,net.criterion,net.optimizer, net.is_inception)
+                print('train loss: ', train_loss)
                 train_loss = train_loss / len(train_loader.sampler)
+                print('train loss / len sampler: ', train_loss)
                 train_acc = (np.sum(np.diag(CMTRAIN)/np.sum(CMTRAIN))*100)
           
                 if net.scheduler is not None:
@@ -312,15 +314,15 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
                 output = model(images)
                 
                 loss = loss_fn(torch.flatten(output), labels.float()) #bcewithlogits
-                print('output: ', output)
-                print('labels: ', labels.float())
-                print('loss: ', loss)
+                #print('output: ', output)
+                #print('labels: ', labels.float())
+                #print('loss: ', loss)
 
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * images.size(0)
-            print('train loss: ', train_loss)
-            print("------------------------------------------------")
+            #print('train loss: ', train_loss)
+            #print("------------------------------------------------")
             scores, predictions = torch.max(output.data, 1)
             CMTRAIN+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1])           
 
