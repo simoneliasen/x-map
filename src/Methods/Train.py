@@ -339,9 +339,9 @@ def train_epoch(net,dataloader):
                 print('loss2: ', loss2)
                 print("--------------------------------------------------------------------------------------")
 
-            loss.backward()
+            loss2.backward()
             optimizer.step()
-            train_loss += loss.item() * images.size(0)
+            train_loss += loss2.item() * images.size(0)
             scores, predictions = torch.max(output.data, 1)
             CMTRAIN+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1])           
 
