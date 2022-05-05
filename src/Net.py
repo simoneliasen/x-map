@@ -57,7 +57,9 @@ class Net():
 
         #Og load params:
         self.batch_size = params['batch_size']
-        self.set_dropout(params)
+
+        if 'dropout_rate' in params:
+            self.set_dropout(params['dropout_rate'])
 
         if params['optimizer'] == "sgd":
             self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
@@ -69,8 +71,7 @@ class Net():
 
         
 
-    def set_dropout(self, params):
-        dropout_rate = params['dropout_rate']
+    def set_dropout(self, dropout_rate):
         #densenet og resnext har ikke dropout. Bør vi selv implementere det?
         if self.model_name == "vgg":
             self.model.classifier[2] = nn.Dropout(p=dropout_rate, inplace=False)
