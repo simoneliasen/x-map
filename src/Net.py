@@ -37,7 +37,7 @@ class Net():
 
     def set_hyperparameters(self, params=None):
         self.criterion2 = nn.BCELoss().cuda() if torch.cuda.is_available() else nn.BCELoss()
-        self.criterion3 = nn.BCEWithLogitsLoss.cuda()
+        self.criterion3 = nn.BCEWithLogitsLoss().cuda()
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None: #altså ingen wandb
