@@ -14,7 +14,7 @@ print(args)
 #i høj grad inspireret fra https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html 
 
 class Net():
-    def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 2, checkpoint = False): #features = tb positive/negative
+    def __init__(self, model_name, pretrained = True, feature_extract = False, num_classes = 1, checkpoint = False): #features = tb positive/negative
         self.model_path = './resnet.pth'
         self.model_name = model_name
         self.data_dir = args.data_path #skal være opdelt i TB_positive og TB_negative
