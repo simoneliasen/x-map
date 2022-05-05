@@ -325,6 +325,11 @@ def train_epoch(net,dataloader):
                 print('output2:', output2)
                 print('labels float: ', labels.float())
 
+                sig_res = sig(output2)
+                print('sig_res: ', sig_res)
+                loss_bce = loss_fn2(sig_res, labels.float())
+                print('loss_bce: ', loss_bce)
+
                 loss2 = loss_fn3(output2, labels.float())
                 print('loss2: ', loss2)
                 print('loss2.item(): ', loss2.item())
