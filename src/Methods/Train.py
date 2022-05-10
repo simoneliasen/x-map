@@ -22,9 +22,15 @@ from Methods.parser import get_arguments
 args = get_arguments()
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net):
-        transform_ting = transforms.Compose([
-            #transforms.Resize(net.input_size + 32), #fordi 224 + 32 = 256. #kommenteret ud pga. at jeg til test bruger resized imgs
-            #transforms.CenterCrop(net.input_size + 32),
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        train_transform = transforms.Compose([
+            transforms.RandomVerticalFlip(p=1),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+
+        val_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
@@ -35,30 +41,30 @@ def KfoldTrain(net):
         parameterDefault = copy.deepcopy(net.model.state_dict())
         optimizerDefault = copy.deepcopy(net.optimizer.state_dict())            
         
-        data_dir = net.data_dir # husk opdelt i TP_positive, TP_positive
+        train_data_dir = f"{net.data_dir}/train/" # husk opdelt i TP_positive, TP_positive
+        test_data_dir = f"{net.data_dir}/test/"
 
-        #imagefolder konverterer vidst selv til RGB.
-        dataset = datasets.ImageFolder(data_dir,       
-                        transform=transform_ting)      
+        #billederne hvis der flippes, roteres osv.
+        train_dataset = datasets.ImageFolder(train_data_dir,       
+                        transform=train_transform)   
+
+        #andet end train, da vi ikke vil rotere og flipper billerne osv.
+        val_dataset = datasets.ImageFolder(train_data_dir,       
+                        transform=val_transform)
+
+        #andre billeder. Specifikt udvalgt til test.
+        test_dataset =  datasets.ImageFolder(test_data_dir,       
+                        transform=val_transform)    
         
         torch.manual_seed(42)
 
-        num_epochs=2 # fra 10
-        batch_size=net.batch_size #fra 128
-        k = 3 # dvs. hver fold er 1/10.
+        batch_size=net.batch_size
+        k = 3 # dvs. hver fold er 1/3.
         
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
-
-        num_train = len(dataset)
-        indices = list(range(num_train))
-        split = int(np.floor(len(dataset) * 0.8))
-        np.random.shuffle(indices)
-        test_idx, kfold_idx = indices[split:], indices[:split]
         
-        test_sampler = SubsetRandomSampler(test_idx)
-        test_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_sampler)
-        KFoldDataset = torch.utils.data.Subset(dataset, kfold_idx)        
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
         
         cumu_val_acc = 0.0
         cumu_val_loss = 0.0
@@ -74,7 +80,7 @@ def KfoldTrain(net):
         Total_Test_Avg_FalsePositiveRate = 0
         #endregion
 
-        for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(KFoldDataset)))):
+        for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(train_dataset)))):
             #Load parameter and optimizer fra inden modellen er kørt
             net.model.load_state_dict(parameterDefault)
             net.optimizer.load_state_dict(optimizerDefault)
@@ -91,10 +97,8 @@ def KfoldTrain(net):
 
             train_sampler = SubsetRandomSampler(train_idx)
             val_sampler = SubsetRandomSampler(val_idx)
-            train_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=train_sampler, pin_memory=True)
-            val_loader = torch.utils.data.DataLoader(KFoldDataset, batch_size=batch_size, sampler=val_sampler, pin_memory=True)
-          
-            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, sampler=train_sampler, pin_memory=True)
+            val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, sampler=val_sampler, pin_memory=True)
 
             history = {'train_loss': [], 'val_loss': [],'train_acc':[],'val_acc':[]}
 
@@ -104,6 +108,8 @@ def KfoldTrain(net):
             patience = 5 #bare til hyper tuning.
             trigger_times = 0
             epoch = 0
+
+            val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)    
             
             while epoch < 500:
 

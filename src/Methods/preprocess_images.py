@@ -188,6 +188,8 @@ def convert_mask2p():
         im = im.convert('P')
         im.save(new_path)
 
-for size in [229, 380, 600]:
-    downscale(size) #300 = inception
+#for size in [299]:
+    #downscale(size) #300 = inception
+
+downscale(299)
 

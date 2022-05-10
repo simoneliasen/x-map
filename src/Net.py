@@ -42,7 +42,7 @@ class Net():
             #sæt selv dine params her:
             #det er replicate af vgg 0 på nye datasæt
             custom_params = {
-                'batch_size': 32,
+                'batch_size': 4,
                 'dropout_rate': 0.00256812486933794,
                 'exponential_scheduler': 0.02113126131894079,
                 'lr': 0.05724327053894954,
