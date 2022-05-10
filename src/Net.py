@@ -39,15 +39,14 @@ class Net():
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None or args.custom_config: #altså ingen wandb
-            #sæt selv dine params her:
-            #det er replicate af vgg 0 på nye datasæt
+            #baseline, vgg19, fra paper
             custom_params = {
-                'batch_size': 4,
-                'dropout_rate': 0.00256812486933794,
-                'exponential_scheduler': 0.02113126131894079,
-                'lr': 0.05724327053894954,
+                'batch_size': 32,
+                #'dropout_rate': 0.00256812486933794,
+                #'exponential_scheduler': 0.02113126131894079,
+                'lr': 0.001,
                 'optimizer': 'sgd',
-                'weight_decay': 0.00006993831652029208,
+                #'weight_decay': 0.00006993831652029208,
             }
             if args.batch_size is not None:
                 custom_params['batch_size'] = args.batch_size
@@ -112,7 +111,8 @@ class Net():
             elif v == 1:
                 self.model = models.vgg16_bn(pretrained=pretrained)
             elif v == 2:
-                self.model = models.vgg19_bn(pretrained=pretrained)
+                self.model = models.vgg19(pretrained=pretrained)
+                #self.model = models.vgg19_bn(pretrained=pretrained)
             
             print(self.model.classifier)
             self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
