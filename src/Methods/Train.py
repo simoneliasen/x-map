@@ -155,9 +155,6 @@ def KfoldTrain(net):
                     if math.isnan(val_loss): #hvis resultatet er helt ude i hampen, bliver det nan. = nicht gud
                         val_loss = 9999999999999999999.9
                     
-                    if args.wandb:
-                      wandb_log(train_loss, val_loss, train_acc, val_acc)
-                    
                     #region Description
                     tn1=CMVAL[0][0]
                     tp1=CMVAL[1][1]
@@ -189,6 +186,8 @@ def KfoldTrain(net):
                     writter.add_scalar('ValFalseNegativeRate', val_FalseNegativeRate, total_steps)
                     writter.add_scalar('ValFalsePositiveRate', val_FalsePositiveRate, total_steps)
 
+                    
+
 
 
                     print("Epoch:{} AVG Training Loss:{:.8f} AVG Val Loss:{:.8f} AVG Training Acc {:.2f} % AVG Val Acc {:.2f} %".format(epoch,
@@ -200,7 +199,11 @@ def KfoldTrain(net):
                     history['val_loss'].append(val_loss)
                     history['train_acc'].append(train_acc)
                     history['val_acc'].append(val_acc) 
-                    #endregion              
+                    #endregion   
+
+                    if args.wandb:
+                        wandb_log("train", train_loss, train_acc, train_sensitivity, train_precision, train_specificity, train_FalseNegativeRate, train_FalsePositiveRate)
+                        wandb_log("val", val_loss, val_acc, Val_sensitivity, val_precision, val_specificity, val_FalseNegativeRate, val_FalsePositiveRate)           
 
                     #print('The Current Loss:', val_loss)
                     val_loss_rounded = float(format(val_loss, '.4f'))
@@ -252,6 +255,8 @@ def KfoldTrain(net):
                             writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
                             writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
                             #endregion
+                            if args.wandb:
+                                wandb_log("test", test_loss, test_correct, test_sensitivity, test_precision, test_specificity, test_FalseNegativeRate, test_FalsePositiveRate)
                             print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
                             cumu_val_acc += best_val_loss_acc
                             cumu_val_loss += best_val_loss

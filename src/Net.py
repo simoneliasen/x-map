@@ -38,7 +38,7 @@ class Net():
     def set_hyperparameters(self, params=None):
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
-        if params is None: #altså ingen wandb
+        if params is None or args.custom_config: #altså ingen wandb
             #sæt selv dine params her:
             #det er replicate af vgg 0 på nye datasæt
             custom_params = {

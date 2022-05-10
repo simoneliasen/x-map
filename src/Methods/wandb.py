@@ -91,11 +91,19 @@ def wandb_initialize(net):
     #kan også bruge et specifikt sweep_id, fx f7pvbfd4 (find på wandb under sweeps)
     #wandb.watch(model)
 
-def wandb_log(train_loss, val_loss, train_acc, val_acc):
-    wandb.log({"train_loss": train_loss})
-    wandb.log({"val_loss": val_loss})
-    wandb.log({"train_acc": train_acc})
-    wandb.log({"val_acc": val_acc})
+def wandb_log(type, loss, acc, sensitivity, precision, specificity, FalseNegativeRate, FalsePositiveRate):
+    if type not in ["train", "val", "test"]:
+        print("FORKERT LOGGET DUDE!")
+    else:
+        wandb.log({f"{type}_loss": loss})
+        wandb.log({f"{type}_acc": acc})
+        wandb.log({f"{type}_sensitivity": sensitivity})
+        wandb.log({f"{type}_precision": precision})
+        wandb.log({f"{type}_specificity": specificity})
+        wandb.log({f"{type}_falseNegativeRate": FalseNegativeRate})
+        wandb.log({f"{type}_falsePositiveRate": FalsePositiveRate})
+
+
 
 def wandb_log_folds_avg(avg_val_acc, avg_val_loss):
     wandb.log({"avg_val_acc":avg_val_acc})
