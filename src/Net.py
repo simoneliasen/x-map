@@ -45,9 +45,11 @@ class Net():
                 #'dropout_rate': 0.00256812486933794,
                 #'exponential_scheduler': 0.02113126131894079,
                 'lr': 0.001,
-                'optimizer': 'sgd',
+                #'optimizer': 'sgd',
                 #'weight_decay': 0.00006993831652029208,
             }
+            self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9)
+
             if args.batch_size is not None:
                 custom_params['batch_size'] = args.batch_size
             
