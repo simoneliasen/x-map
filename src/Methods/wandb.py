@@ -39,6 +39,9 @@ sweep_config = {
 def load_model_sweep_configs():
     sweep_config['name'] = f"{args.model}_version_{args.model_version}"
 
+    if args.baseline:
+        sweep_config['name'] = 'Baseline'
+
     #ellers laver den en ny empty sweep med det navn på wandb dashboard
     if args.sweep is not None: 
         del sweep_config['name']

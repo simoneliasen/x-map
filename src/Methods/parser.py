@@ -18,6 +18,10 @@ def get_arguments():
     parser.add_argument('--no-custom_config', dest='custom_config', action='store_false')
     parser.set_defaults(custom_config=False)
 
+    parser.add_argument('--baseline', help="skriv config i net.py set_hyperparameters()!!!", dest='baseline', action='store_true')
+    parser.add_argument('--no-baseline', dest='baseline', action='store_false')
+    parser.set_defaults(baseline=False)
+
     parser.add_argument('--sweep', type=str, required=False)
 
     parser.add_argument('--scheduler', dest='scheduler', action='store_true')
