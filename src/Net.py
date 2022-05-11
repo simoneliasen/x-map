@@ -115,7 +115,7 @@ class Net():
             elif v == 1:
                 self.model = models.vgg16_bn(pretrained=pretrained)
             elif v == 2:
-                self.model = models.vgg19(pretrained=pretrained)
+                self.model = torch.hub.load('pytorch/vision:v0.10.0', 'vgg19', pretrained=True)
                 #self.model = models.vgg19_bn(pretrained=pretrained)
             
             print(self.model.classifier)
