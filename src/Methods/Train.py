@@ -25,7 +25,7 @@ def KfoldTrain(net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         train_transform = transforms.Compose([
-            transforms.RandomVerticalFlip(p=1),
+            #transforms.RandomVerticalFlip(p=1),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])

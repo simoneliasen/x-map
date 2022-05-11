@@ -115,8 +115,8 @@ class Net():
             elif v == 1:
                 self.model = models.vgg16_bn(pretrained=pretrained)
             elif v == 2:
-                self.model = models.vgg19(pretrained=pretrained)
-                #self.model = models.vgg19_bn(pretrained=pretrained)
+                #self.model = models.vgg19(pretrained=pretrained)
+                self.model = models.vgg19_bn(pretrained=pretrained)
             
             print(self.model.classifier)
             self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
