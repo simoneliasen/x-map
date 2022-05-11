@@ -25,7 +25,10 @@ def KfoldTrain(net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         train_transform = transforms.Compose([
-            #transforms.RandomVerticalFlip(p=1),
+            #transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+            #transforms.RandomHorizontalFlip(p=0.2),
+            #transforms.RandomAutocontrast(p=0.3),
+            #transforms.Grayscale(1),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])

@@ -35,28 +35,40 @@ class Net():
             from Methods.Train import KfoldTrain
             KfoldTrain(self)
 
+    def set_baselineparameters(self):
+        self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
+
+        #baseline, vgg19, fra paper
+        params = {
+            'batch_size': 32,
+            'lr': 0.001,
+        }
+        print('custom baseline hyperpameters!', params)
+
+        self.batch_size = params['batch_size']
+        self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9)
+        args.scheduler = False
+        self.scheduler = None
+
     def set_hyperparameters(self, params=None):
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None or args.custom_config: #altså ingen wandb
-            #baseline, vgg19, fra paper
+            #vores bedste sweep, vgg19, crimson sweep 1:
             custom_params = {
                 'batch_size': 32,
-                #'dropout_rate': 0.00256812486933794,
-                #'exponential_scheduler': 0.02113126131894079,
-                'lr': 0.001,
-                'optimizer': 'none',
-                #'weight_decay': 0.00006993831652029208,
+                'dropout_rate': 0.05233710200284458,
+                'exponential_scheduler': 0.028372597647743948,
+                'lr': 0.002987017391774973,
+                'optimizer': 'sgd',
+                'weight_decay': 0.00009916691342646931,
             }
-            self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9)
-            args.scheduler = False
-            self.scheduler = None
 
             if args.batch_size is not None:
                 custom_params['batch_size'] = args.batch_size
             
             params = custom_params
-            print('custom hyperpameters!', params)
+            print('custom bedste sweep hyperpameters!', params)
 
         #Og load params:
         self.batch_size = params['batch_size']

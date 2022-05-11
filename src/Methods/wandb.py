@@ -118,6 +118,9 @@ def wandb_log_folds_avg(avg_val_acc, avg_val_loss):
 def sweep():
     wandb.init(config=sweep_config)
     net_copy = deepcopy(_net)
-    net_copy.set_hyperparameters(wandb.config)
+    if args.baseline:
+        net_copy.set_baselineparameters()
+    else:
+        net_copy.set_hyperparameters(wandb.config) #sæt for baseline, vores, og wandb?
     from Methods.Train import KfoldTrain
     KfoldTrain(net_copy)
