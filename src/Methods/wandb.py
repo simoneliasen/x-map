@@ -45,6 +45,9 @@ def load_model_sweep_configs():
     #ellers laver den en ny empty sweep med det navn på wandb dashboard
     if args.sweep is not None: 
         del sweep_config['name']
+    
+    if args.name != 'none':
+        sweep_config['name'] = args.name
 
     #dense og resnext har ikke dropout
     if args.model in ["resnext", "densenet"]:

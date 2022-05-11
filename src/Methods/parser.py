@@ -29,6 +29,7 @@ def get_arguments():
     parser.set_defaults(scheduler=True)
     
     parser.add_argument('--model', type=str, help="vælg en fra model_names", required=False)
+    parser.add_argument('--name', type=str, help="navn til dit sweep", required=False, default='none')
     parser.add_argument('--batch_size', type=int, required=False)
     parser.add_argument('--model_version', type=int, required=False, default=0)
 
