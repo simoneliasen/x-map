@@ -28,10 +28,10 @@ def get_arguments():
     parser.add_argument('--no-scheduler', dest='scheduler', action='store_false')
     parser.set_defaults(scheduler=True)
     
-    parser.add_argument('--model', type=str, help="vælg en fra model_names", required=False)
+    parser.add_argument('--model', type=str, help="vælg en fra model_names", required=False, default="vgg") #vgg fordi den vandt. Og baseline er same.
     parser.add_argument('--name', type=str, help="navn til dit sweep", required=False, default='none')
     parser.add_argument('--batch_size', type=int, required=False)
-    parser.add_argument('--model_version', type=int, required=False, default=0)
+    parser.add_argument('--model_version', type=int, required=False, default=2) #default 2 fordi vgg19 vandt. Samme version for baseline.
 
     # Parse the argument
     args = parser.parse_args()
