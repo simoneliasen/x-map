@@ -50,6 +50,7 @@ class Net():
             }
             self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9)
             args.scheduler = False
+            net.scheduler = None
 
             if args.batch_size is not None:
                 custom_params['batch_size'] = args.batch_size
