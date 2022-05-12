@@ -3,7 +3,33 @@ from copy import deepcopy
 from Methods.parser import get_arguments
 args = get_arguments()
 
-sweep_config = {
+sweep_config = { #TIL DATA AUGMENTATION
+    'name': 'navn',
+    'method': 'grid', #grid, random, bayesian
+    'metric': {
+    'name': 'avg_val_loss',
+    'goal': 'minimize'   
+        },
+    'parameters': {
+        'vertical_flip': {
+            'values': ['true', 'false']
+        },
+        'horizontal_flip': { 
+            'values': ['true', 'false']
+        },
+        'random_affine': { 
+            'values': ['true', 'false']
+        },
+        'color_jitter': { 
+            'values': ['true', 'false']
+        },
+        'grayscale': { 
+            'values': ['true', 'false']
+        },
+    }
+}
+
+sweep_config_old = {
     'name': 'navn',
     'method': 'bayes', #grid, random, bayesian
     'metric': {
@@ -82,8 +108,6 @@ def load_model_sweep_configs():
         sweep_config['parameters']['batch_size']['values'] = [2]
 
 
-    print('batch range er: ', sweep_config['parameters']['batch_size']['values'])
-
 load_model_sweep_configs()
 
 _net = None
@@ -122,5 +146,7 @@ def sweep():
         net_copy.set_baselineparameters()
     else:
         net_copy.set_hyperparameters(wandb.config) #sæt for baseline, vores, og wandb?
+
+    net_copy.set_transforms(wandb.config)
     from Methods.Train import KfoldTrain
     KfoldTrain(net_copy)

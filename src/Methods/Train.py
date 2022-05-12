@@ -15,6 +15,7 @@ import copy
 import os
 import glob 
 import math
+import matplotlib.pyplot as plt
 
 from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
@@ -23,20 +24,6 @@ args = get_arguments()
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
 def KfoldTrain(net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-        train_transform = transforms.Compose([
-            #transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-            #transforms.RandomHorizontalFlip(p=0.2),
-            #transforms.RandomAutocontrast(p=0.3),
-            #transforms.Grayscale(1),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
-
-        val_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
 
         print(net.model_name)
         #Bruges til at lave en kopi af parameterne før model er kørt
@@ -49,15 +36,15 @@ def KfoldTrain(net):
 
         #billederne hvis der flippes, roteres osv.
         train_dataset = datasets.ImageFolder(train_data_dir,       
-                        transform=train_transform)   
+                        transform=net.train_transform)   
 
         #andet end train, da vi ikke vil rotere og flipper billerne osv.
         val_dataset = datasets.ImageFolder(train_data_dir,       
-                        transform=val_transform)
+                        transform=net.val_transform)
 
         #andre billeder. Specifikt udvalgt til test.
         test_dataset =  datasets.ImageFolder(test_data_dir,       
-                        transform=val_transform)    
+                        transform=net.val_transform)    
         
         torch.manual_seed(42)
 
@@ -313,7 +300,10 @@ def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
         CMTRAIN = 0
         model.train()
         for images, labels in dataloader:
-            
+            #if args.wandb_data_augmentation:
+                #plt.imshow(  images[0].permute(1, 2, 0)  )
+                #plt.show()
+
             images,labels = images.to(device),labels.to(device)
             optimizer.zero_grad()
 

@@ -27,6 +27,10 @@ def get_arguments():
     parser.add_argument('--scheduler', dest='scheduler', action='store_true')
     parser.add_argument('--no-scheduler', dest='scheduler', action='store_false')
     parser.set_defaults(scheduler=True)
+
+    parser.add_argument('--wandb_data_augmentation', dest='wandb_data_augmentation', action='store_true')
+    parser.add_argument('--no-wandb_data_augmentation', dest='wandb_data_augmentation', action='store_false')
+    parser.set_defaults(wandb_data_augmentation=False)
     
     parser.add_argument('--model', type=str, help="vælg en fra model_names", required=False, default="vgg") #vgg fordi den vandt. Og baseline er same.
     parser.add_argument('--name', type=str, help="navn til dit sweep", required=False, default='none')

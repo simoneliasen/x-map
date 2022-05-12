@@ -1,7 +1,7 @@
 import torch
 from torch import nn, relu
 from torch import optim
-from torchvision import models
+from torchvision import models, transforms
 import glob 
 import os
 import copy
@@ -23,6 +23,7 @@ class Net():
         self.input_size = 224
         print(self.device)
         self.load_model(model_name, pretrained, num_classes)
+        self.set_transforms()
         
         self.model.eval()
         self.model.to(self.device)
@@ -97,6 +98,47 @@ class Net():
 
         elif self.model_name == "efficientnet":
             self.model.classifier[0] = nn.Dropout(p=dropout_rate, inplace=True)
+    
+    def set_transforms(self, params = None):
+        if params is None: #bare brug standard:
+            print("sætter standard transforms.")
+            self.train_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+
+            self.val_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+        
+        elif args.wandb_data_augmentation:
+            print("wandb sætter transforms!", params) 
+            brightness, contrast, saturation, hue = (0.4, 0.4, 0.4, 0.2) if params.color_jitter == "true" else (0.0, 0.0, 0.0, 0.0) #nasnet.
+            degrees, translate, scale = ((-30, 30), (0.1, 0.1), (0.7, 0.8)) if params.random_affine == "true" else ((0, 0), (0.0, 0.0), (1, 1))
+            h_flip = 0.2 if params.horizontal_flip == "true" else 0.0
+            v_flip = 0.2 if params.vertical_flip == "true" else 0.0
+            include_grayscale = True if params.grayscale == "true" else False
+
+            if include_grayscale:
+                self.train_transform = transforms.Compose([
+                transforms.ColorJitter(brightness=brightness, contrast=contrast, saturation=saturation, hue=hue), 
+                transforms.RandomAffine(degrees=degrees, translate=translate, scale=scale),
+                transforms.RandomHorizontalFlip(p=h_flip),
+                transforms.RandomVerticalFlip(p=v_flip),
+                transforms.Grayscale(3),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ])
+            else:
+                self.train_transform = transforms.Compose([
+                transforms.ColorJitter(brightness=brightness, contrast=contrast, saturation=saturation, hue=hue), 
+                transforms.RandomAffine(degrees=degrees, translate=translate, scale=scale),
+                transforms.RandomHorizontalFlip(p=h_flip),
+                transforms.RandomVerticalFlip(p=v_flip),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ])
 
     def load_model(self, model_name, pretrained, num_classes):
         v = args.model_version
@@ -130,7 +172,7 @@ class Net():
                 #self.model = models.vgg19(pretrained=pretrained)
                 self.model = models.vgg19_bn(pretrained=pretrained)
             
-            print(self.model.classifier)
+            #print(self.model.classifier)
             self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
 
         elif model_name == "inception":
