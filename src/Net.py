@@ -62,7 +62,7 @@ class Net():
                 'exponential_scheduler': 0.028372597647743948,
                 'lr': 0.002987017391774973,
                 'optimizer': 'sgd',
-                'weight_decay': 0.009916691342646931, #fra 'weight_decay': 0.00009916691342646931,
+                'weight_decay': 0.00009916691342646931, #fra 'weight_decay': 0.00009916691342646931,
             }
 
             if args.batch_size is not None:
@@ -70,6 +70,10 @@ class Net():
             
             params = custom_params
             print('custom bedste sweep hyperpameters!', params)
+
+        if args.weight_decay is not None:
+            print('args weight decay er: ', args.weight_decay)
+            params['batch_size'] = args.weight_decay
 
         #Og load params:
         self.batch_size = params['batch_size']
