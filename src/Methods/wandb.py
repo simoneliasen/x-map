@@ -3,7 +3,64 @@ from copy import deepcopy
 from Methods.parser import get_arguments
 args = get_arguments()
 
-sweep_config = { #TIL DATA AUGMENTATION
+sweep_config = { #til weight decay test
+    'name': 'navn', #alle andre er bare sat til den hypertunede.
+    'method': 'grid', #grid, random, bayesian
+    'metric': {
+    'name': 'avg_val_loss',
+    'goal': 'minimize'   
+        },
+    'parameters': {
+        'batch_size': { 
+            'values': [32]
+        },
+        'exponential_scheduler': { 
+            'values': [0.028372597647743948]
+        },
+        'lr': { 
+            'values': [0.002987017391774973]
+        },
+        'weight_decay': { #1x, 10x, 100x, 1000x, 10.000x
+            'values': [0.00009916691342646931, 0.001, 0.01, 0.1, 1]
+        },
+        'dropout_rate': {
+            'values': [0.05233710200284458]
+        },
+    }
+}
+
+sweep_config_new = {
+    'name': 'navn',
+    'method': 'random', #grid, random, bayesian
+    'metric': {
+    'name': 'avg_val_loss',
+    'goal': 'minimize'   
+        },
+    'parameters': {
+        'batch_size': { 
+            'values': [32, 64]
+        },
+        'exponential_scheduler': { 
+            'min': 0.025,
+            'max': 0.04, 
+        },
+        'lr': { 
+            'min': 0.0001,
+            'max': 0.04,
+            #LOG UNIFORM!!!
+        },
+        'weight_decay': { 
+            'min': 0.00005,
+            'max': 0.001,
+        },
+        'dropout_rate': {
+            'min': 0.0,
+            'max': 0.3,
+        },
+    }
+}
+
+sweep_config_data_augmentation = { #TIL DATA AUGMENTATION
     'name': 'navn',
     'method': 'grid', #grid, random, bayesian
     'metric': {
