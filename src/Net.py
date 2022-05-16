@@ -62,7 +62,7 @@ class Net():
                 'exponential_scheduler': 0.028372597647743948,
                 'lr': 0.002987017391774973,
                 'optimizer': 'sgd',
-                'weight_decay': 0.00009916691342646931,
+                'weight_decay': 0.009916691342646931, #fra 'weight_decay': 0.00009916691342646931,
             }
 
             if args.batch_size is not None:
@@ -77,10 +77,12 @@ class Net():
         if 'dropout_rate' in params:
             self.set_dropout(params['dropout_rate'])
 
-        if params['optimizer'] == "sgd":
-            self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
-        elif params['optimizer'] == "rmsprop":
-            self.optimizer = optim.RMSprop(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
+        #vi kører kun SGD nu. Da den performede bedst.
+        self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
+        #if params['optimizer'] == "sgd":
+        #    self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
+        #elif params['optimizer'] == "rmsprop":
+        #    self.optimizer = optim.RMSprop(self.model.parameters(), lr=params['lr'], momentum=0.9, weight_decay=params['weight_decay'])
         
         if args.scheduler:
             self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=params['exponential_scheduler'])
