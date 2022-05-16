@@ -73,7 +73,7 @@ class Net():
 
         if args.weight_decay is not None:
             print('args weight decay er: ', args.weight_decay)
-            params['batch_size'] = args.weight_decay
+            params['weight_decay'] = args.weight_decay
 
         #Og load params:
         self.batch_size = params['batch_size']
