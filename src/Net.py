@@ -103,11 +103,13 @@ class Net():
         if params is None: #bare brug standard:
             print("sætter standard transforms.")
             self.train_transform = transforms.Compose([
+                transforms.Grayscale(3),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
 
             self.val_transform = transforms.Compose([
+                transforms.Grayscale(3),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
