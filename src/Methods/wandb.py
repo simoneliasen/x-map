@@ -45,13 +45,13 @@ sweep_config = {
             'max': 0.04, 
         },
         'lr': { 
-            'distribution': 'log_uniform_values',
+            'distribution': 'inv_log_uniform',
             'min': 0.0001,
             'max': 0.04,
             #LOG UNIFORM!!!
         },
         'weight_decay': {
-            'distribution': 'log_uniform_values', 
+            'distribution': 'inv_log_uniform', 
             'min': 0.001,
             'max': 0.1,
             #LOG UNIFORM!!! 10x - 1000x
