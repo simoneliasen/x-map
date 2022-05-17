@@ -46,14 +46,14 @@ sweep_config = {
         },
         'lr': { 
             'distribution': 'log_uniform',
-            'min': 0.0001,
-            'max': 0.04,
+            'min': -4, #log(0.0001)
+            'max': -1.39794000867, #log(0.04)
             #LOG UNIFORM!!!
         },
         'weight_decay': {
             'distribution': 'log_uniform', 
-            'min': 0.001,
-            'max': 0.1,
+            'min': -3, #log 0.001
+            'max': -1, #log 0.1
             #LOG UNIFORM!!! 10x - 1000x
         },
         'dropout_rate': {
