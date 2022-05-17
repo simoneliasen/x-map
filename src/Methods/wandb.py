@@ -3,7 +3,7 @@ from copy import deepcopy
 from Methods.parser import get_arguments
 args = get_arguments()
 
-sweep_config = { #til weight decay test
+sweep_config_weight_decay_test = { #til weight decay test
     'name': 'navn', #alle andre er bare sat til den hypertunede.
     'method': 'grid', #grid, random, bayesian
     'metric': {
@@ -29,7 +29,7 @@ sweep_config = { #til weight decay test
     }
 }
 
-sweep_config_new = {
+sweep_config = {
     'name': 'navn',
     'method': 'random', #grid, random, bayesian
     'metric': {
@@ -47,11 +47,14 @@ sweep_config_new = {
         'lr': { 
             'min': 0.0001,
             'max': 0.04,
+            'distribution': 'log_uniform'
             #LOG UNIFORM!!!
         },
         'weight_decay': { 
-            'min': 0.00005,
-            'max': 0.001,
+            'min': 0.001,
+            'max': 0.1,
+            'distribution': 'log_uniform'
+            #LOG UNIFORM!!! 10x - 1000x
         },
         'dropout_rate': {
             'min': 0.0,
