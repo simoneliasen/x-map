@@ -16,6 +16,8 @@ import os
 import glob 
 import math
 import matplotlib.pyplot as plt
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
 
 from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
@@ -102,8 +104,7 @@ def KfoldTrain(net):
 
             val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)    
             
-            while epoch < 500:
-
+            while epoch < 500: 
                 epoch += 1
                 if epoch < 4: #lidt nemmere debug
                     print('Epoch: ', epoch) 
@@ -208,8 +209,8 @@ def KfoldTrain(net):
                             #og så træn på valideringsfolden i forrige_epochs/2 antal epochs, da vi antager en nogenlunde lineær korrelation.
                             total_epoch_for_val_training = math.floor(epoch / 2)
 
+                            print("TRÆNER PÅ VAL SÆT!!!")
                             for epoch in range(total_epoch_for_val_training):
-                                print("TRÆNER PÅ VAL SÆT!!!")
                                 train_loss, CMTRAIN=train_epoch(net.model,device,val_loader,net.criterion,net.optimizer, net.is_inception) #bemærk: val loader!
                             epoch = 505
                             print('Early stopping!\nStarting the test process.')
@@ -222,7 +223,7 @@ def KfoldTrain(net):
                             checkpoint_file_optimizer = load_checkpoint(net, string = "optimizer")
                             net.model.load_state_dict(torch.load(checkpoint_file_model))
                             net.optimizer.load_state_dict(torch.load(checkpoint_file_optimizer))
-                            test_loss, CMTEST= test_method(net.model,device,test_loader,net.criterion, net.is_inception)
+                            test_loss, CMTEST= test_method(net, net.model,device,test_loader,net.criterion, net.is_inception)
                             test_loss = test_loss / len(test_loader.sampler)
                             test_correct = (np.sum(np.diag(CMTEST)/np.sum(CMTEST))*100)
 
@@ -290,6 +291,25 @@ def KfoldTrain(net):
         writter.add_scalar('TotalAVGTestFalsePositiveRate', Total_Test_Avg_FalsePositiveRate, fold)
         #endregion
 
+def roc_auc(net, scores, labels):
+        yolo = roc_auc_score(labels.cpu(), scores.cpu(), labels =[0,1])
+        fpr1, tpr1, thresh1 = roc_curve(labels.cpu(), scores.cpu(), pos_label = 1)
+
+        print(thresh1)
+        plt.style.use('seaborn')
+        # plot roc curves
+        plt.plot(fpr1, tpr1, linestyle='--',color='orange', label= net.model_name)
+        # title
+        plt.title('ROC curve')
+        # x label
+        plt.xlabel('False Positive Rate')
+        # y label
+        plt.ylabel('True Positive rate')
+
+        plt.legend(loc='best')
+        timenow = datetime.now()
+        timestring1 = str(timenow.strftime("%d.%m.%Y.%H.%M.%S"))
+        plt.savefig('/content/{}{}.pdf'.format(net.model_name, timestring1),dpi=300)
 
 def save_checkpoint(net, fold):
         fold_string = str(fold)
@@ -375,7 +395,7 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
     return valid_loss,CMVAL
 
 
-def test_method(model,device,dataloader,loss_fn, is_inception):
+def test_method(net, model,device,dataloader,loss_fn, is_inception):
     similar_diseases_fp_dict = {
         'normal': {
             'fp': 0,
