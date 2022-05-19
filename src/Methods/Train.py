@@ -296,19 +296,19 @@ def save_checkpoint(net, fold):
 
 def fp_similar_diseases(paths, predictions, similar_diseases_fp_dict):
 
-    similar_diseases_name_identifiers = {
+    disease_name_identifiers = {
         'pneumonia': 'person', 
         'lung_cancer': 'jpcln', 
         'covid': 'covid',
     }
 
-    normal_name_identifiers = ['normal', 'jpcnn', '_0.png']
+    normal_name_identifiers = ['normal', 'jpcnn', '_0.png', '\\im-']
 
     for i in range(len(paths)):
         path = paths[i].lower()
 
-        for disease in similar_diseases_name_identifiers:
-            if disease in path:
+        for disease in disease_name_identifiers:
+            if disease_name_identifiers[disease] in path:
                 predict_status = 'tn' if predictions[i] == 0 else 'fp'
                 similar_diseases_fp_dict[disease][predict_status] += 1
 
