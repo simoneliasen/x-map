@@ -205,6 +205,12 @@ def KfoldTrain(net):
                         print('Trigger Times:', trigger_times)
                         
                         if trigger_times >= patience:
+                            #og så træn på valideringsfolden i forrige_epochs/2 antal epochs, da vi antager en nogenlunde lineær korrelation.
+                            total_epoch_for_val_training = math.floor(epoch / 2)
+
+                            for epoch in range(total_epoch_for_val_training):
+                                print("TRÆNER PÅ VAL SÆT!!!")
+                                train_loss, CMTRAIN=train_epoch(net.model,device,val_loader,net.criterion,net.optimizer, net.is_inception) #bemærk: val loader!
                             epoch = 505
                             print('Early stopping!\nStarting the test process.')
                             foldperf['fold{}'.format(fold+1)] = history
@@ -259,6 +265,8 @@ def KfoldTrain(net):
                         best_val_loss = val_loss_rounded
                         best_val_loss_acc = val_acc
 
+            break #KUN 1 FOLD
+
         avg_val_acc = cumu_val_acc / float(k)
         avg_val_loss = cumu_val_loss / float(k)
         print('avg_val_acc er: ', avg_val_acc)
@@ -281,7 +289,6 @@ def KfoldTrain(net):
         writter.add_scalar('TotalAVGTestFalseNegativeRate', Total_Test_Avg_FalseNegativeRate, fold)
         writter.add_scalar('TotalAVGTestFalsePositiveRate', Total_Test_Avg_FalsePositiveRate, fold)
         #endregion
-
 
 
 def save_checkpoint(net, fold):
