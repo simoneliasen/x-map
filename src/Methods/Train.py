@@ -4,7 +4,7 @@ from pyexpat import model
 from sklearn.metrics import confusion_matrix
 from sklearn.utils import shuffle
 from torchvision import datasets, transforms, models
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, cross_validate
 import torch
 from torch.utils.data.sampler import SubsetRandomSampler 
 import numpy as np
@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 
 from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
+from Methods.ImageFolderWithPaths import ImageFolderWithPaths
 
 args = get_arguments()
 #kræver at nettet har self.model, self.criterion, self.optimizer. Evt. brug interface?
@@ -35,15 +36,15 @@ def KfoldTrain(net):
         test_data_dir = f"{net.data_dir}/test/"
 
         #billederne hvis der flippes, roteres osv.
-        train_dataset = datasets.ImageFolder(train_data_dir,       
+        train_dataset = ImageFolderWithPaths(train_data_dir,       
                         transform=net.train_transform)   
 
         #andet end train, da vi ikke vil rotere og flipper billerne osv.
-        val_dataset = datasets.ImageFolder(train_data_dir,       
+        val_dataset = ImageFolderWithPaths(train_data_dir,       
                         transform=net.val_transform)
 
         #andre billeder. Specifikt udvalgt til test.
-        test_dataset =  datasets.ImageFolder(test_data_dir,       
+        test_dataset =  ImageFolderWithPaths(test_data_dir,       
                         transform=net.val_transform)    
         
         torch.manual_seed(42)
@@ -293,13 +294,35 @@ def save_checkpoint(net, fold):
         torch.save(net.model.state_dict(), model_FILE)
         torch.save(net.optimizer.state_dict(), optimizer_FILE)
 
-        
+def fp_similar_diseases(paths, predictions, similar_diseases_fp_dict):
+
+    similar_diseases_name_identifiers = {
+        'pneumonia': 'person', 
+        'lung_cancer': 'jpcln', 
+        'covid': 'covid',
+    }
+
+    normal_name_identifiers = ['normal', 'jpcnn', '_0.png']
+
+    for i in range(len(paths)):
+        path = paths[i].lower()
+
+        for disease in similar_diseases_name_identifiers:
+            if disease in path:
+                predict_status = 'tn' if predictions[i] == 0 else 'fp'
+                similar_diseases_fp_dict[disease][predict_status] += 1
+
+        for identifier in normal_name_identifiers:
+            if identifier in path:
+                predict_status = 'tn' if predictions[i] == 0 else 'fp'
+                similar_diseases_fp_dict['normal'][predict_status] += 1
+
 
 def train_epoch(model,device,dataloader,loss_fn,optimizer, is_inception):
         train_loss=0.0
         CMTRAIN = 0
         model.train()
-        for images, labels in dataloader:
+        for images, labels, paths in dataloader:
             #if args.wandb_data_augmentation:
                 #plt.imshow(  images[0].permute(1, 2, 0)  )
                 #plt.show()
@@ -330,7 +353,7 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
     model.eval()
 
     with torch.no_grad(): #undgå cuda out of memoery fejl?
-        for images, labels in dataloader:
+        for images, labels, paths in dataloader:
 
             images,labels = images.to(device),labels.to(device)
             #lav
@@ -346,12 +369,31 @@ def valid_epoch(model,device,dataloader,loss_fn, is_inception):
 
 
 def test_method(model,device,dataloader,loss_fn, is_inception):
+    similar_diseases_fp_dict = {
+        'normal': {
+            'fp': 0,
+            'tn': 0,
+        },
+        'pneumonia': {
+            'fp': 0,
+            'tn': 0,
+        },
+        'lung_cancer': {
+            'fp': 0,
+            'tn': 0,
+        },
+        'covid': {
+            'fp': 0,
+            'tn': 0,
+        },
+    }
+
     test_loss=0.0
     CMTEST = 0
     model.eval()
 
     with torch.no_grad(): #undgå cuda out of memoery fejl?
-        for images, labels in dataloader:
+        for images, labels, paths in dataloader:
 
             images,labels = images.to(device),labels.to(device)
             #lav
@@ -361,8 +403,11 @@ def test_method(model,device,dataloader,loss_fn, is_inception):
 
             test_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
+            fp_similar_diseases(paths, predictions, similar_diseases_fp_dict)
             CMTEST+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
 
+    print(args.name, ' fp dict: ')
+    print(similar_diseases_fp_dict)
     return test_loss,CMTEST
 
 def load_checkpoint(net, string):
