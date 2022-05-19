@@ -248,6 +248,17 @@ def split_test_train():
         new_path = new_neg_train_path + f"\\{file}"
         os.rename(path, new_path)
 
+def add_prefix(prefix):
+    pospath = r"C:\Users\PC\Desktop\im"
+    pos = [f for f in listdir(pospath) if isfile(join(pospath, f))]
+
+    hejmor_path = r'C:\Users\PC\Desktop\hejmor'
+
+    for file in pos:
+        path = pospath + f"\\{file}"
+        new_path = hejmor_path + f"\\{prefix}_{file}"
+        os.rename(path, new_path)
+
 def remove_subset_from_dir():
     remove_pos_path = r"C:\Users\PC\Desktop\datasets\hard\data_224\TB_Positive"
     
@@ -337,4 +348,6 @@ def move_all_except_subset():
 
 #move_random_x_left()
 
-move_all_except_subset()
+#move_all_except_subset()
+
+add_prefix('hejmor')

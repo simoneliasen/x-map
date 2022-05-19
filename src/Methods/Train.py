@@ -302,7 +302,7 @@ def fp_similar_diseases(paths, predictions, similar_diseases_fp_dict):
         'covid': 'covid',
     }
 
-    normal_name_identifiers = ['normal', 'jpcnn', '_0.png', '\\im-']
+    normal_name_identifiers = ['normal', 'jpcnn', '_0.png', 'hejmor']
 
     for i in range(len(paths)):
         path = paths[i].lower()
