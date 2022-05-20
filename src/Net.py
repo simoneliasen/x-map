@@ -55,14 +55,14 @@ class Net():
         self.criterion = nn.CrossEntropyLoss().cuda() if torch.cuda.is_available() else nn.CrossEntropyLoss()
 
         if params is None or args.custom_config: #altså ingen wandb
-            #vores bedste sweep, vgg19, crimson sweep 1:
+            #vores bedste sweep, vgg19, crimson sweep 135, sidste hyper tuning!!:
             custom_params = {
-                'batch_size': 32,
-                'dropout_rate': 0.05233710200284458,
-                'exponential_scheduler': 0.028372597647743948,
-                'lr': 0.002987017391774973,
+                'batch_size': 64,
+                'dropout_rate': 0.2240528899675059,
+                'exponential_scheduler': 0.03650568851533068,
+                'lr': 0.013092657913576744,
                 'optimizer': 'sgd',
-                'weight_decay': 0.00009916691342646931, #fra 'weight_decay': 0.00009916691342646931,
+                'weight_decay': 0.01321053058237727,
             }
 
             if args.batch_size is not None:

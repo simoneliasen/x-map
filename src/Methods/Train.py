@@ -308,9 +308,9 @@ def roc_auc(net, scores, labels):
         scores2 = numpy.array(new_scores).flatten()
         labels2 = numpy.array(new_lables).flatten()
         fpr1, tpr1, thresh1 = roc_curve(labels2, scores2)
-        print(thresh1)
+        print('threshholds: ', thresh1)
         xx = auc(fpr1,tpr1)
-        print(xx)
+        print('auc: ', xx)
 
         #print("aucscore: {}".format(yolo))
         plt.style.use('seaborn')
