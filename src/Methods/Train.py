@@ -239,7 +239,9 @@ def KfoldTrain(net):
                             test_specificity= (tn2/(tn2+fp2))*100
                             test_FalseNegativeRate= (1-(tp2/(tp2+fn2)))*100
                             test_FalsePositiveRate = (1-(tn2/(tn2+fp2)))*100
-                    
+
+                            train_F1Score = 2 * (test_precision*test_sensitivity)/(test_precision+test_sensitivity)
+                            print('f1 score: ', train_F1Score)
                             Total_Test_Avg_Loss += test_loss
                             Total_Test_Avg_Acc += test_correct
                             Total_Test_Avg_Sensitivity += test_sensitivity
