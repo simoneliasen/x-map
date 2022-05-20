@@ -18,6 +18,8 @@ import math
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
+import numpy
 
 from Methods.wandb import wandb_log, wandb_log_folds_avg
 from Methods.parser import get_arguments
@@ -292,13 +294,30 @@ def KfoldTrain(net):
         #endregion
 
 def roc_auc(net, scores, labels):
-        yolo = roc_auc_score(labels.cpu(), scores.cpu(), labels =[0,1])
-        fpr1, tpr1, thresh1 = roc_curve(labels.cpu(), scores.cpu(), pos_label = 1)
+        # yolo = roc_auc_score(labels.cpu(), scores.cpu())
+        # print(yolo)
+        new_scores = []
+        new_lables = []
 
+        for x in labels:
+            new_lables.append(x.cpu().numpy())
+
+        for x in scores:
+            new_scores.append(x.cpu().numpy())
+
+        scores2 = numpy.array(new_scores).flatten()
+        labels2 = numpy.array(new_lables).flatten()
+        fpr1, tpr1, thresh1 = roc_curve(labels2, scores2)
         print(thresh1)
+        xx = auc(fpr1,tpr1)
+        print(xx)
+
+        #print("aucscore: {}".format(yolo))
         plt.style.use('seaborn')
         # plot roc curves
         plt.plot(fpr1, tpr1, linestyle='--',color='orange', label= net.model_name)
+        plt.xlim([0, 0.14])
+        plt.ylim([0.8, 1])
         # title
         plt.title('ROC curve')
         # x label
@@ -308,8 +327,8 @@ def roc_auc(net, scores, labels):
 
         plt.legend(loc='best')
         timenow = datetime.now()
-        timestring1 = str(timenow.strftime("%d.%m.%Y.%H.%M.%S"))
-        plt.savefig('/content/{}{}.pdf'.format(net.model_name, timestring1),dpi=300)
+        time_string1 = str(timenow.strftime("%d.%m.%Y.%H.%M.%S"))
+        plt.savefig('/content/{}_{}.png'.format(net.model_name, time_string1),dpi=300, transparent=True)
 
 def save_checkpoint(net, fold):
         fold_string = str(fold)
@@ -415,6 +434,9 @@ def test_method(net, model,device,dataloader,loss_fn, is_inception):
         },
     }
 
+    SigmoidScores = []
+    labelsAUROC = []
+
     test_loss=0.0
     CMTEST = 0
     model.eval()
@@ -427,12 +449,19 @@ def test_method(net, model,device,dataloader,loss_fn, is_inception):
 
             output = model(images)
             loss = loss_fn(output,labels)
+            sigmoidpred= torch.softmax(output, dim=1)
 
             test_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
             fp_similar_diseases(paths, predictions, similar_diseases_fp_dict)
             CMTEST+=confusion_matrix(labels.cpu(), predictions.cpu(), labels =[0,1]) 
+            for x in sigmoidpred:
+                scoresSig = x.data[1]
+                SigmoidScores.append(scoresSig)
+            for x in labels:
+                labelsAUROC.append(x)
 
+    roc_auc(net, SigmoidScores, labelsAUROC)
     print(args.name, ' fp dict: ')
     print(similar_diseases_fp_dict)
     return test_loss,CMTEST
