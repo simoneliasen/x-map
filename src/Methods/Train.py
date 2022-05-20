@@ -37,7 +37,9 @@ def KfoldTrain(net):
         optimizerDefault = copy.deepcopy(net.optimizer.state_dict())            
         
         train_data_dir = f"{net.data_dir}/train/" # husk opdelt i TP_positive, TP_positive
-        test_data_dir = f"{net.data_dir}/test/"
+
+        test_data_dir_easy = "/content/dataset/datasets/easy/test"
+        test_data_dir_hard = "/content/dataset/datasets/hard/test"
 
         #billederne hvis der flippes, roteres osv.
         train_dataset = ImageFolderWithPaths(train_data_dir,       
@@ -48,8 +50,10 @@ def KfoldTrain(net):
                         transform=net.val_transform)
 
         #andre billeder. Specifikt udvalgt til test.
-        test_dataset =  ImageFolderWithPaths(test_data_dir,       
-                        transform=net.val_transform)    
+        test_dataset_easy =  ImageFolderWithPaths(test_data_dir_easy,       
+                        transform=net.val_transform)
+        test_dataset_hard =  ImageFolderWithPaths(test_data_dir_hard,       
+                        transform=net.val_transform)       
         
         torch.manual_seed(42)
 
@@ -59,7 +63,8 @@ def KfoldTrain(net):
         splits=KFold(n_splits=k,shuffle=True,random_state=42) #random state randomizer, men med det samme resultat. (seed)
         foldperf={}
         
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+        test_loader_easy = torch.utils.data.DataLoader(test_dataset_easy, batch_size=batch_size, shuffle=False)
+        test_loader_hard = torch.utils.data.DataLoader(test_dataset_hard, batch_size=batch_size, shuffle=False)
         
         cumu_val_acc = 0.0
         cumu_val_loss = 0.0
@@ -216,53 +221,57 @@ def KfoldTrain(net):
                                 train_loss, CMTRAIN=train_epoch(net.model,device,val_loader,net.criterion,net.optimizer, net.is_inception) #bemærk: val loader!
                             epoch = 505
                             print('Early stopping!\nStarting the test process.')
-                            foldperf['fold{}'.format(fold+1)] = history
-                            # x  = 0
-                            # avg_test_loss = 0
-                            # avg_test_acc = 0
 
-                            checkpoint_file_model = load_checkpoint(net, string = "model")
-                            checkpoint_file_optimizer = load_checkpoint(net, string = "optimizer")
-                            net.model.load_state_dict(torch.load(checkpoint_file_model))
-                            net.optimizer.load_state_dict(torch.load(checkpoint_file_optimizer))
-                            test_loss, CMTEST= test_method(net, net.model,device,test_loader,net.criterion, net.is_inception)
-                            test_loss = test_loss / len(test_loader.sampler)
-                            test_correct = (np.sum(np.diag(CMTEST)/np.sum(CMTEST))*100)
+                            for test in ['easy', 'hard']:
+                                print("EASY TEST:")
+                                test_loader = test_loader_easy if test == 'easy' else test_loader_hard
+                                foldperf['fold{}'.format(fold+1)] = history
+                                # x  = 0
+                                # avg_test_loss = 0
+                                # avg_test_acc = 0
 
-                            #region cmtest
-                            tn2=CMTEST[0][0]
-                            tp2=CMTEST[1][1]
-                            fp2=CMTEST[0][1]
-                            fn2=CMTEST[1][0]
-                            test_sensitivity= (tp2/(tp2+fn2))*100
-                            test_precision= (tp2/(tp2+fp2))*100
-                            test_specificity= (tn2/(tn2+fp2))*100
-                            test_FalseNegativeRate= (1-(tp2/(tp2+fn2)))*100
-                            test_FalsePositiveRate = (1-(tn2/(tn2+fp2)))*100
+                                checkpoint_file_model = load_checkpoint(net, string = "model")
+                                checkpoint_file_optimizer = load_checkpoint(net, string = "optimizer")
+                                net.model.load_state_dict(torch.load(checkpoint_file_model))
+                                net.optimizer.load_state_dict(torch.load(checkpoint_file_optimizer))
+                                test_loss, CMTEST= test_method(net, net.model,device,test_loader,net.criterion, net.is_inception)
+                                test_loss = test_loss / len(test_loader.sampler)
+                                test_correct = (np.sum(np.diag(CMTEST)/np.sum(CMTEST))*100)
 
-                            train_F1Score = 2 * (test_precision*test_sensitivity)/(test_precision+test_sensitivity)
-                            print('f1 score: ', train_F1Score)
-                            Total_Test_Avg_Loss += test_loss
-                            Total_Test_Avg_Acc += test_correct
-                            Total_Test_Avg_Sensitivity += test_sensitivity
-                            Total_Test_Avg_precision += test_precision
-                            Total_Test_Avg_specificity += test_specificity
-                            Total_Test_Avg_FalseNegativeRate += test_FalseNegativeRate
-                            Total_Test_Avg_FalsePositiveRate += test_FalsePositiveRate
-                            writter.add_scalar('TestLoss', test_loss, fold)
-                            writter.add_scalar('TestAccuracy', test_correct, fold)
-                            writter.add_scalar('TestSensitivity', test_sensitivity, fold)
-                            writter.add_scalar('TestPrecision', test_precision, fold)
-                            writter.add_scalar('TestSpecificity', test_specificity, fold)
-                            writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
-                            writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
-                            #endregion
-                            if args.wandb:
-                                wandb_log("test", test_loss, test_correct, test_sensitivity, test_precision, test_specificity, test_FalseNegativeRate, test_FalsePositiveRate)
-                            print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
-                            cumu_val_acc += best_val_loss_acc
-                            cumu_val_loss += best_val_loss
-                            print('cumu val loss: ' ,cumu_val_loss)
+                                #region cmtest
+                                tn2=CMTEST[0][0]
+                                tp2=CMTEST[1][1]
+                                fp2=CMTEST[0][1]
+                                fn2=CMTEST[1][0]
+                                test_sensitivity= (tp2/(tp2+fn2))*100
+                                test_precision= (tp2/(tp2+fp2))*100
+                                test_specificity= (tn2/(tn2+fp2))*100
+                                test_FalseNegativeRate= (1-(tp2/(tp2+fn2)))*100
+                                test_FalsePositiveRate = (1-(tn2/(tn2+fp2)))*100
+
+                                train_F1Score = 2 * (test_precision*test_sensitivity)/(test_precision+test_sensitivity)
+                                print('f1 score: ', train_F1Score)
+                                Total_Test_Avg_Loss += test_loss
+                                Total_Test_Avg_Acc += test_correct
+                                Total_Test_Avg_Sensitivity += test_sensitivity
+                                Total_Test_Avg_precision += test_precision
+                                Total_Test_Avg_specificity += test_specificity
+                                Total_Test_Avg_FalseNegativeRate += test_FalseNegativeRate
+                                Total_Test_Avg_FalsePositiveRate += test_FalsePositiveRate
+                                writter.add_scalar('TestLoss', test_loss, fold)
+                                writter.add_scalar('TestAccuracy', test_correct, fold)
+                                writter.add_scalar('TestSensitivity', test_sensitivity, fold)
+                                writter.add_scalar('TestPrecision', test_precision, fold)
+                                writter.add_scalar('TestSpecificity', test_specificity, fold)
+                                writter.add_scalar('TestFalseNegativeRate', test_FalseNegativeRate, fold)
+                                writter.add_scalar('TestFalsePositiveRate', test_FalsePositiveRate, fold)
+                                #endregion
+                                if args.wandb:
+                                    wandb_log("test", test_loss, test_correct, test_sensitivity, test_precision, test_specificity, test_FalseNegativeRate, test_FalsePositiveRate)
+                                print("Test Loss:{:.8f}, Test Acc:{:.8f} %, Test Sensitivity:{:.8f} %, Test Precision:{:.8f} % ".format(test_loss, test_correct, test_sensitivity, test_precision))
+                                cumu_val_acc += best_val_loss_acc
+                                cumu_val_loss += best_val_loss
+                                print('cumu val loss: ' ,cumu_val_loss)
                                 
                     else: #ergo: den nye val er bedre
                         save_checkpoint(net, fold)
