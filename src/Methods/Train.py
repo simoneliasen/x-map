@@ -447,6 +447,7 @@ def test_method(net, model,device,dataloader,loss_fn, is_inception):
 
     SigmoidScores = []
     labelsAUROC = []
+    missclassified = []
 
     test_loss=0.0
     CMTEST = 0
@@ -472,6 +473,11 @@ def test_method(net, model,device,dataloader,loss_fn, is_inception):
             for x in labels:
                 labelsAUROC.append(x)
 
+            for i in range(labels):
+                if predictions[i] != labels[i]:
+                    missclassified.append(paths[i])
+
+    print('misclassified: ', missclassified)
     roc_auc(net, SigmoidScores, labelsAUROC)
     print(args.name, ' fp dict: ')
     print(similar_diseases_fp_dict)
