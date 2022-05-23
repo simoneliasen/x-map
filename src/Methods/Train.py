@@ -111,7 +111,7 @@ def KfoldTrain(net):
 
             val_loss, CMVAL=valid_epoch(net.model,device,val_loader,net.criterion, net.is_inception)    
             
-            while epoch < 500: 
+            while epoch < 500:
                 epoch += 1
                 if epoch < 4: #lidt nemmere debug
                     print('Epoch: ', epoch) 
@@ -448,6 +448,7 @@ def test_method(net, model,device,dataloader,loss_fn, is_inception):
     SigmoidScores = []
     labelsAUROC = []
     missclassified = []
+    not_misclassified_counter = 0
 
     test_loss=0.0
     CMTEST = 0
@@ -473,12 +474,14 @@ def test_method(net, model,device,dataloader,loss_fn, is_inception):
             for x in labels:
                 labelsAUROC.append(x)
 
-            for i in range(labels):
-                if predictions[i] != labels[i]:
-                    missclassified.append(paths[i])
+            for i in range(len(labels.cpu().numpy())):
+                if predictions.cpu().numpy()[i] != labels.cpu().numpy()[i]:
+                    missclassified.append(paths[i].split(r"\TB_")[-1])
+                else:
+                    not_misclassified_counter += 1
 
     print('misclassified: ', missclassified)
-    roc_auc(net, SigmoidScores, labelsAUROC)
+    #roc_auc(net, SigmoidScores, labelsAUROC)
     print(args.name, ' fp dict: ')
     print(similar_diseases_fp_dict)
     return test_loss,CMTEST
